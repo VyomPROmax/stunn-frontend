@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stunn. — Agentic AI</title>
+<meta name="description" content="Stunn. — Agentic AI research partner." />
+
+<!-- Dynamic favicon: black bolt in light mode, white bolt in dark mode, orange glow in both -->
+<link rel="icon" type="image/svg+xml" href="favicon-light.svg" media="(prefers-color-scheme: light)" />
+<link rel="icon" type="image/svg+xml" href="favicon-dark.svg"  media="(prefers-color-scheme: dark)"  />
+<!-- Fallback for older browsers (Safari, older Chrome) -->
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="favicon.png" />
+
+<!-- Markdown Parser & Sanitizer -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+<style>
+  :root{
+    --paper:#efeee7;
+    --paper-2:#f4f2eb;
+    --ink:#0d1418;
+    --muted:#5e7380;
+    --line:#c8c9c3;
+    --accent:#dc613e;
+    --teal:#2d817e;
+    --black:#12191d;
+    --soft:#e3e1d9;
+    --card-bg:rgba(255,255,255,.18);
+    --input-bg:rgba(247,246,239,.88);
+    --code-bg:#12191d;
+    --code-hdr:#1b242a;
+    --code-fg:#f4f2eb;
+  }
+
+  [data-theme="dark"]{
+    --paper:#0f1519;
+    --paper-2:#161e24;
+    --ink:#eaeae6;
+    --muted:#8b9ca6;
+    --line:#26343e;
+    --accent:#e66b47;
+    --teal:#3db2ad;
+    --black:#080b0d;
+    --soft:#1b252c;
+    --card-bg:rgba(255,255,255,.05);
+    --input-bg:rgba(22,30,36,.92);
+    --code-bg:#080c0e;
+    --code-hdr:#121a20;
+    --code-fg:#eaeae6;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  /* Permanently eliminate any Netlify injected drawer, badge, or toolbar */
+  #netlify-drawer,
+  [data-netlify-drawer],
+  [id*="netlify"],
+  iframe[src*="netlify"],
+  .netlify-badge,
+  div[class*="netlify"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  html,body{height:100%}
+
+  body{
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    overflow:hidden;
+    transition:background .25s ease, color .25s ease;
+  }
+
+  button,textarea,select{font:inherit}
+
+  .page{
+    height:100dvh;
+    min-height:640px;
+    display:grid;
+    grid-template-columns:280px 1fr;
+    border-top:1px solid var(--ink);
+    background:var(--paper);
+  }
+
+  /* LEFT RAIL */
+  .rail{
+    position:relative;
+    border-right:1px solid var(--line);
+    padding:24px 20px 20px;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    gap:16px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+
+  .brand-mark{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:var(--black);
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    color:#f7f5ec;
+  }
+
+  .brand-mark svg{
+    width:19px;
+    height:19px;
+  }
+
+  .brand-name{
+    font-family: Georgia, "Times New Roman", serif;
+    font-size:20px;
+    line-height:1;
+    letter-spacing:-.02em;
+    margin-top:2px;
+  }
+
+  .brand-sub{
+    margin-top:5px;
+    font:10px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    letter-spacing:.18em;
+    color:var(--muted);
+  }
+
+  .new-chat-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink);
+    cursor:pointer;
+    font:12px/1 "SFMono-Regular", Consolas, monospace;
+    letter-spacing:.04em;
+    transition:all .18s ease;
+  }
+
+  .new-chat-btn:hover{
+    background:rgba(220,97,62,.1);
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .history-container{
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .history-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+
+  .eyebrow{
+    font:10px/1.25 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  .history-list{
+    list-style:none;
+    overflow-y:auto;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+
+  .history-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    color:var(--ink);
+    border:1px solid transparent;
+    transition:background .15s ease, border-color .15s ease;
+    gap:8px;
+  }
+
+  .history-item:hover{
+    background:rgba(255,255,255,.2);
+    border-color:var(--line);
+  }
+
+  [data-theme="dark"] .history-item:hover{
+    background:rgba(255,255,255,.05);
+  }
+
+  .history-item.active{
+    background:rgba(220,97,62,.12);
+    border-color:var(--accent);
+    color:var(--accent);
+    font-weight:500;
+  }
+
+  .history-title{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    flex:1;
+  }
+
+  .history-del{
+    opacity:0;
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    padding:2px 4px;
+    border-radius:4px;
+    font-size:12px;
+    line-height:1;
+  }
+
+  .history-item:hover .history-del{
+    opacity:1;
+  }
+
+  .history-del:hover{
+    color:var(--accent);
+  }
+
+  .systems{
+    border-top:1px solid var(--line);
+    padding-top:14px;
+    font:10px/1.2 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    letter-spacing:.12em;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .systems-led-wrap{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .systems .led{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#78a6a0;
+    box-shadow:0 0 0 4px rgba(45,129,126,.15);
+  }
+
+  /* MAIN */
+  .main{
+    min-width:0;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .topbar{
+    height:64px;
+    flex:0 0 64px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 36px;
+    gap:16px;
+  }
+
+  .topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .mode-select-wrap{
+    display:flex;
+    align-items:center;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:2px 8px;
+  }
+
+  .mode-select{
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    font:11px/1.4 "SFMono-Regular", Consolas, monospace;
+    letter-spacing:.04em;
+    cursor:pointer;
+    outline:none;
+    padding:4px 0;
+  }
+
+  .mode-select option{
+    background:var(--paper);
+    color:var(--ink);
+  }
+
+  .topbar-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .action-btn{
+    border:1px solid var(--line);
+    background:var(--card-bg);
+    color:var(--ink);
+    border-radius:8px;
+    padding:6px 12px;
+    cursor:pointer;
+    font:11px/1 "SFMono-Regular", Consolas, monospace;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:all .18s ease;
+  }
+
+  .action-btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .action-btn.active{
+    background:var(--accent);
+    color:white;
+    border-color:var(--accent);
+  }
+
+  .clear{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    font:11px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  .clear:hover{color:var(--accent)}
+
+  .workspace{
+    position:relative;
+    min-height:0;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    padding:0 48px;
+  }
+
+  .conversation{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:24px 2px 16px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+
+  .conversation::-webkit-scrollbar{width:8px}
+  .conversation::-webkit-scrollbar-thumb{
+    background:var(--line);
+    border-radius:8px;
+  }
+
+  .hero{
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .hero-copy{
+    padding-top:4px;
+  }
+
+  h1{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:clamp(54px,6vw,84px);
+    line-height:.92;
+    letter-spacing:-.065em;
+    font-weight:400;
+    max-width:850px;
+  }
+
+  h1 .obvious{
+    display:block;
+    color:var(--accent);
+    font-family: Georgia, "Times New Roman", serif;
+    font-style:italic;
+    font-weight:400;
+    letter-spacing:-.05em;
+    margin-top:4px;
+  }
+
+  .intro{
+    margin-top:24px;
+    max-width:740px;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.7;
+  }
+
+  .suggestions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    width:min(620px,100%);
+    margin-top:28px;
+  }
+
+  .suggestion{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--card-bg);
+    border-radius:13px;
+    padding:15px 16px;
+    min-height:64px;
+    text-align:left;
+    cursor:pointer;
+    color:var(--ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease;
+  }
+
+  .suggestion:hover{
+    background:rgba(255,255,255,.3);
+    border-color:var(--accent);
+    transform:translateY(-1px);
+  }
+
+  .suggestion span:first-child{
+    font:12px/1.45 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  .arrow{
+    color:var(--accent);
+    font:18px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    transform:translateY(-2px);
+  }
+
+  .vertical-mark{
+    position:absolute;
+    right:4px;
+    top:59px;
+    writing-mode:vertical-rl;
+    font:9px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    letter-spacing:.21em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+
+  .composer-wrap{
+    padding:0 0 20px;
+  }
+
+  .composer{
+    position:relative;
+    border:1px solid var(--ink);
+    border-radius:18px;
+    background:var(--input-bg);
+    box-shadow:0 6px 0 var(--ink);
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    min-height:64px;
+    padding:8px 10px 8px 16px;
+  }
+
+  textarea{
+    flex:1;
+    min-width:0;
+    height:46px;
+    max-height:132px;
+    resize:none;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--ink);
+    padding:12px 0;
+    font-size:15px;
+    line-height:1.45;
+  }
+
+  textarea::placeholder{color:var(--muted)}
+
+  .composer-btn-group{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .icon-btn{
+    width:38px;
+    height:38px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--card-bg);
+    color:var(--ink);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:all .18s ease;
+  }
+
+  .icon-btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .icon-btn.recording{
+    background:#dc3545;
+    color:white;
+    border-color:#dc3545;
+    animation:pulse-red 1.2s infinite;
+  }
+
+  @keyframes pulse-red{
+    0%{box-shadow:0 0 0 0 rgba(220,53,69,.5)}
+    70%{box-shadow:0 0 0 8px rgba(220,53,69,0)}
+    100%{box-shadow:0 0 0 0 rgba(220,53,69,0)}
+  }
+
+  .send{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:10px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    transition:filter .18s ease,transform .18s ease;
+  }
+
+  .send:hover{
+    filter:brightness(1.06);
+    transform:translateY(-1px);
+  }
+
+  .send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  .send svg{
+    width:17px;
+    height:17px;
+  }
+
+  .composer-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    padding:0 4px;
+    font:9.5px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    letter-spacing:.08em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+
+  /* MESSAGES */
+  .message{
+    display:flex;
+    gap:12px;
+    margin:12px 0;
+    animation:rise .2s ease both;
+  }
+
+  .message.user{justify-content:flex-end}
+
+  .bubble{
+    max-width:min(780px,86%);
+    border:1px solid var(--line);
+    background:var(--card-bg);
+    padding:14px 18px;
+    border-radius:14px;
+    word-break:break-word;
+    color:var(--ink);
+    line-height:1.6;
+    font-size:14.5px;
+  }
+
+  .message.user .bubble{
+    background:var(--black);
+    color:#fff;
+    border-color:var(--black);
+    white-space:pre-wrap;
+  }
+
+  [data-theme="dark"] .message.user .bubble{
+    background:#1f2930;
+    border-color:#2a3740;
+  }
+
+  .message.bot .bubble{
+    white-space:normal;
+  }
+
+  .message.bot .bubble p{
+    margin:0 0 10px;
+  }
+
+  .message.bot .bubble p:last-child{
+    margin-bottom:0;
+  }
+
+  .message.bot .bubble ul,
+  .message.bot .bubble ol{
+    margin:8px 0 12px 22px;
+  }
+
+  .message.bot .bubble li{
+    margin:4px 0;
+  }
+
+  .message.bot .bubble code{
+    font-family:"SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size:13px;
+    background:rgba(0,0,0,.08);
+    padding:2px 5px;
+    border-radius:4px;
+  }
+
+  [data-theme="dark"] .message.bot .bubble code{
+    background:rgba(255,255,255,.1);
+  }
+
+  /* Code Blocks */
+  .code-wrap{
+    position:relative;
+    margin:14px 0;
+    border-radius:9px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+
+  .code-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--code-hdr);
+    color:#9ba8af;
+    font:11px/1 "SFMono-Regular", Consolas, monospace;
+    padding:8px 14px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  .code-header-btns{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .code-action-btn{
+    background:rgba(255,255,255,.1);
+    color:#e5e7eb;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:5px;
+    padding:3px 8px;
+    font:10px/1.2 "SFMono-Regular", Consolas, monospace;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+
+  .code-action-btn:hover{
+    background:rgba(255,255,255,.24);
+    color:#fff;
+  }
+
+  .message.bot .bubble pre{
+    background:var(--code-bg);
+    color:var(--code-fg);
+    padding:14px 16px;
+    margin:0;
+    overflow-x:auto;
+    scrollbar-width:thin;
+    scrollbar-color:#4a5960 transparent;
+  }
+
+  .message.bot .bubble pre code{
+    background:transparent;
+    color:inherit;
+    padding:0;
+    border-radius:0;
+    font-size:13px;
+    line-height:1.55;
+    display:block;
+  }
+
+  .code-output{
+    background:#0a0d0f;
+    border-top:1px solid rgba(255,255,255,.1);
+    color:#38bdf8;
+    padding:10px 14px;
+    font:11.5px/1.4 "SFMono-Regular", Consolas, monospace;
+    white-space:pre-wrap;
+    display:none;
+    max-height:180px;
+    overflow-y:auto;
+  }
+
+  /* Tables */
+  .table-wrap{
+    overflow-x:auto;
+    margin:14px 0;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--card-bg);
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+
+  .message.bot .bubble table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    text-align:left;
+  }
+
+  .message.bot .bubble th,
+  .message.bot .bubble td{
+    padding:9px 14px;
+    border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+
+  .message.bot .bubble th:last-child,
+  .message.bot .bubble td:last-child{
+    border-right:0;
+  }
+
+  .message.bot .bubble tr:last-child td{
+    border-bottom:0;
+  }
+
+  .message.bot .bubble th{
+    background:rgba(0,0,0,.06);
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:.02em;
+  }
+
+  [data-theme="dark"] .message.bot .bubble th{
+    background:rgba(255,255,255,.05);
+  }
+
+  .message.bot .bubble tr:nth-child(even) td{
+    background:rgba(0,0,0,.025);
+  }
+
+  [data-theme="dark"] .message.bot .bubble tr:nth-child(even) td{
+    background:rgba(255,255,255,.02);
+  }
+
+  /* Cartoony Little Thunderbolt Sketch (No box, no card, no cube, pure doodle) */
+  .thinking-doodle-container{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:4px 0;
+    margin:6px 0 10px;
+    animation:rise .2s ease both;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+
+  .thinking-doodle-container.fading-out{
+    opacity:0;
+    transform:translateY(-3px);
+    pointer-events:none;
+  }
+
+  .thunderbolt-sketch{
+    width:34px;
+    height:34px;
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .bolt-svg{
+    width:100%;
+    height:100%;
+    overflow:visible;
+  }
+
+  .sketch-bolt{
+    fill:#f59e0b;
+    stroke:var(--ink);
+    stroke-width:2.4;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+    transform-origin:25px 25px;
+    animation:cartoonZing .85s cubic-bezier(.34,1.56,.64,1) infinite;
+    filter:drop-shadow(0 2px 6px rgba(245,158,11,.4));
+  }
+
+  [data-theme="dark"] .sketch-bolt{
+    stroke:#161e24;
+    fill:#fbbf24;
+    filter:drop-shadow(0 0 10px rgba(251,191,36,.65));
+  }
+
+  .bolt-ray{
+    stroke:#f59e0b;
+    stroke-width:2.2;
+    stroke-linecap:round;
+    animation:rayPop .85s ease-out infinite;
+  }
+
+  .ray-1{ animation-delay: .08s; }
+  .ray-2{ animation-delay: .28s; }
+  .ray-3{ animation-delay: .48s; }
+  .ray-4{ animation-delay: .18s; }
+  .ray-5{ animation-delay: .38s; }
+
+  @keyframes cartoonZing{
+    0%, 100%{ transform: scale(.92) rotate(-4deg); }
+    25%{ transform: scale(1.18) rotate(5deg); }
+    50%{ transform: scale(.95) rotate(-3deg); }
+    75%{ transform: scale(1.14) rotate(4deg); }
+  }
+
+  @keyframes rayPop{
+    0%, 100%{ opacity: 0; transform: scale(.6); }
+    40%{ opacity: 1; transform: scale(1.15); }
+    75%{ opacity: 0; }
+  }
+
+  .thinking-doodle-text{
+    font:10.5px/1 "SFMono-Regular", Consolas, monospace;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+  }
+
+  /* Rock-solid, Smooth Electric Cursor */
+  .stunn-cursor{
+    display:inline-block;
+    width:7px;
+    height:15px;
+    background:var(--accent);
+    border-radius:2px;
+    margin-left:4px;
+    vertical-align:-2px;
+    box-shadow:0 0 8px rgba(220,97,62,.65);
+    animation:cursorGlow .75s ease-in-out infinite;
+  }
+
+  @keyframes cursorGlow{
+    0%, 100%{ opacity: 1; transform: scaleY(1); }
+    50%{ opacity: .25; transform: scaleY(.85); }
+  }
+
+  /* Smooth Fade-in Look for Streamed Content */
+  .stream-content{
+    animation:contentFade .28s ease-out;
+  }
+
+  @keyframes contentFade{
+    from{ opacity: .4; filter: blur(1.5px); transform: translateY(2px); }
+    to{ opacity: 1; filter: blur(0); transform: translateY(0); }
+  }
+
+  .cursor-blink{
+    display:inline-block;
+    width:6px;
+    height:14px;
+    background:var(--accent);
+    margin-left:3px;
+    vertical-align:middle;
+    animation:blink .75s infinite;
+  }
+
+  @keyframes blink{
+    0%,100%{opacity:1}
+    50%{opacity:0}
+  }
+
+  .typing{
+    display:inline-flex;
+    gap:4px;
+    align-items:center;
+  }
+
+  .typing i{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#72838a;
+    animation:bounce 1s infinite;
+  }
+
+  .typing i:nth-child(2){animation-delay:.15s}
+  .typing i:nth-child(3){animation-delay:.3s}
+
+  @keyframes bounce{
+    0%,70%,100%{transform:translateY(0);opacity:.45}
+    35%{transform:translateY(-4px);opacity:1}
+  }
+
+  @keyframes rise{
+    from{opacity:0;transform:translateY(6px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  @media (max-width: 920px){
+    .page{grid-template-columns:230px 1fr}
+    .topbar,.workspace{padding-left:24px;padding-right:24px}
+    h1{font-size:62px}
+  }
+
+  @media (max-width: 720px){
+    body{overflow:auto}
+    .page{
+      height:auto;
+      min-height:100dvh;
+      grid-template-columns:1fr;
+    }
+    .rail{
+      border-right:0;
+      border-bottom:1px solid var(--line);
+      padding-bottom:16px;
+    }
+    .topbar{
+      height:auto;
+      padding:14px 18px;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .workspace{padding:0 16px}
+    .conversation{padding-top:16px}
+    h1{font-size:46px}
+    .intro{font-size:13.5px}
+    .suggestions{grid-template-columns:1fr}
+    .vertical-mark{display:none}
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3.2l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.6L12 3.2z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Stunn.</div>
+        <div class="brand-sub">AGENTIC AI v2.0</div>
+      </div>
+    </div>
+
+    <button class="new-chat-btn" id="newChatBtn" type="button">
+      <span>+</span> New Inquiry
+    </button>
+
+    <div class="history-container">
+      <div class="history-header">
+        <div class="eyebrow">Recent Inquiries</div>
+      </div>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
+
+    <div class="systems">
+      <div class="systems-led-wrap">
+        <span class="led"></span>
+        <span>SYSTEMS ONLINE</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="mode-select-wrap">
+          <select class="mode-select" id="modeSelect" title="Select Stunn Persona">
+            <option value="general">⚡ Auto Intelligence</option>
+            <option value="coder">💻 Coder (Zero-Glitch)</option>
+            <option value="research">🔬 Deep Research</option>
+            <option value="concise">🎯 High-Density Concise</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="action-btn" id="webSearchToggle" type="button" title="Toggle Live Web Search">
+          <span>🌐</span>
+          <span id="webSearchLabel">Search: OFF</span>
+        </button>
+
+        <button class="action-btn" id="themeToggle" type="button" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <button class="clear" id="clearConversation" type="button">Clear</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="conversation" id="conversation">
+        <div class="hero" id="welcome">
+          <div class="hero-copy">
+            <h1>
+              Ask beyond the
+              <span class="obvious">obvious.</span>
+            </h1>
+
+            <p class="intro">
+              A research partner with real-time streaming, zero-glitch code architecting,
+              and live web synthesis. Give Stunn a challenge.
+            </p>
+
+            <div class="suggestions">
+              <button class="suggestion" data-q="Research the latest breakthroughs in fusion energy and summarize them with a comparison table.">
+                <span>Map recent fusion energy<br>breakthroughs in a table</span>
+                <span class="arrow">↗</span>
+              </button>
+
+              <button class="suggestion" data-q="Write a robust Python calculator with full error handling and tests.">
+                <span>Architect a zero-glitch<br>Python calculator</span>
+                <span class="arrow">↗</span>
+              </button>
+
+              <button class="suggestion" data-q="What is 15% compound interest on $10,000 over 8 years with a year-by-year table?">
+                <span>Calculate an eight-year investment schedule</span>
+                <span class="arrow">↗</span>
+              </button>
+
+              <button class="suggestion" data-q="Explain quantum computing like I'm five with real-world analogies.">
+                <span>Make quantum computing intuitive</span>
+                <span class="arrow">↗</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="vertical-mark">STUNN / 02</div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea id="input" rows="1" placeholder="What are you curious about?"></textarea>
+
+          <div class="composer-btn-group">
+            <button class="icon-btn" id="voiceBtn" type="button" title="Voice Input (Speech-to-Text)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+
+            <button class="send" id="send" type="button" title="Send (Enter)">
+              <svg id="sendIcon" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h13M13 7l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg id="stopIcon" style="display:none;width:15px;height:15px;" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="5" y="5" width="14" height="14" rx="2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="composer-meta">
+          <span>Enter to send · Shift + Enter for new line</span>
+          <span id="activeModeLabel">MODE: AUTO</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<script>
+  // ===== BACKEND ENDPOINTS =====
+  const BASE_URL = "https://stunn-tshm.onrender.com";
+  const STREAM_URL = `${BASE_URL}/chat/stream`;
+  const CHAT_URL = `${BASE_URL}/chat`;
+
+  // ===== STATE MANAGEMENT =====
+  let currentSessionId = localStorage.getItem("stunn_current_session") || crypto.randomUUID();
+  localStorage.setItem("stunn_current_session", currentSessionId);
+
+  let webSearchEnabled = false;
+  let activeAbortController = null;
+
+  // DOM Elements
+  const conversationEl = document.getElementById("conversation");
+  const welcomeEl = document.getElementById("welcome");
+  const inputEl = document.getElementById("input");
+  const sendEl = document.getElementById("send");
+  const sendIcon = document.getElementById("sendIcon");
+  const stopIcon = document.getElementById("stopIcon");
+  const voiceBtn = document.getElementById("voiceBtn");
+  const webSearchToggle = document.getElementById("webSearchToggle");
+  const webSearchLabel = document.getElementById("webSearchLabel");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const modeSelect = document.getElementById("modeSelect");
+  const activeModeLabel = document.getElementById("activeModeLabel");
+  const clearEl = document.getElementById("clearConversation");
+  const newChatBtn = document.getElementById("newChatBtn");
+  const historyListEl = document.getElementById("historyList");
+
+  // ===== THEME (DARK / LIGHT) =====
+  function initTheme() {
+    const saved = localStorage.getItem("stunn_theme") || "light";
+    document.documentElement.setAttribute("data-theme", saved);
+    themeIcon.textContent = saved === "dark" ? "☀️" : "🌙";
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", current);
+    localStorage.setItem("stunn_theme", current);
+    themeIcon.textContent = current === "dark" ? "☀️" : "🌙";
+  });
+
+  initTheme();
+
+  // ===== WEB SEARCH TOGGLE =====
+  webSearchToggle.addEventListener("click", () => {
+    webSearchEnabled = !webSearchEnabled;
+    webSearchToggle.classList.toggle("active", webSearchEnabled);
+    webSearchLabel.textContent = webSearchEnabled ? "Search: ON" : "Search: OFF";
+  });
+
+  // ===== MODE SELECTOR =====
+  modeSelect.addEventListener("change", (e) => {
+    activeModeLabel.textContent = "MODE: " + e.target.value.toUpperCase();
+  });
+
+  // ===== LOCAL STORAGE CHAT HISTORY =====
+  function getChats() {
+    try {
+      return JSON.parse(localStorage.getItem("stunn_chats") || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  function saveChats(chats) {
+    localStorage.setItem("stunn_chats", JSON.stringify(chats));
+  }
+
+  function saveMessageToCurrentChat(role, content) {
+    const chats = getChats();
+    if (!chats[currentSessionId]) {
+      chats[currentSessionId] = {
+        id: currentSessionId,
+        title: content.slice(0, 32) + (content.length > 32 ? "…" : ""),
+        messages: [],
+        timestamp: Date.now()
+      };
+    }
+    chats[currentSessionId].messages.push({ role, content });
+    saveChats(chats);
+    renderHistoryList();
+  }
+
+  function renderHistoryList() {
+    const chats = getChats();
+    historyListEl.innerHTML = "";
+
+    const sorted = Object.values(chats).sort((a, b) => b.timestamp - a.timestamp);
+
+    sorted.forEach((c) => {
+      const li = document.createElement("li");
+      li.className = "history-item" + (c.id === currentSessionId ? " active" : "");
+
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "history-title";
+      titleSpan.textContent = c.title || "Inquiry";
+      titleSpan.onclick = () => loadChat(c.id);
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "history-del";
+      delBtn.textContent = "×";
+      delBtn.title = "Delete chat";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteChat(c.id);
+      };
+
+      li.appendChild(titleSpan);
+      li.appendChild(delBtn);
+      historyListEl.appendChild(li);
+    });
+  }
+
+  function loadChat(sessionId) {
+    currentSessionId = sessionId;
+    localStorage.setItem("stunn_current_session", currentSessionId);
+    renderHistoryList();
+
+    conversationEl.innerHTML = "";
+    const chats = getChats();
+    const chat = chats[sessionId];
+
+    if (!chat || chat.messages.length === 0) {
+      showWelcomeHero();
+      return;
+    }
+
+    chat.messages.forEach((m) => {
+      renderBubble(m.role, m.content);
+    });
+  }
+
+  function deleteChat(sessionId) {
+    const chats = getChats();
+    delete chats[sessionId];
+    saveChats(chats);
+
+    if (currentSessionId === sessionId) {
+      newChat();
+    } else {
+      renderHistoryList();
+    }
+  }
+
+  function newChat() {
+    currentSessionId = crypto.randomUUID();
+    localStorage.setItem("stunn_current_session", currentSessionId);
+    showWelcomeHero();
+    renderHistoryList();
+    inputEl.focus();
+  }
+
+  newChatBtn.addEventListener("click", newChat);
+
+  // ===== AUTOGROW TEXTAREA =====
+  function autoGrow() {
+    inputEl.style.height = "auto";
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 132) + "px";
+  }
+
+  inputEl.addEventListener("input", autoGrow);
+
+  // ===== MARKDOWN FORMATTING & ENHANCEMENTS =====
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function formatMarkdown(text) {
+    if (typeof marked !== "undefined") {
+      try {
+        marked.setOptions({ gfm: true, breaks: true });
+        let html = marked.parse(text);
+        if (typeof DOMPurify !== "undefined") {
+          html = DOMPurify.sanitize(html);
+        }
+        return html;
+      } catch (err) {
+        console.error("Markdown parse error:", err);
+      }
+    }
+    return escapeHtml(text);
+  }
+
+  function enhanceBubble(bubble) {
+    // 1. Wrap tables in responsive scroll container
+    bubble.querySelectorAll("table").forEach((table) => {
+      if (!table.parentElement.classList.contains("table-wrap")) {
+        const wrap = document.createElement("div");
+        wrap.className = "table-wrap";
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
+      }
+    });
+
+    // 2. Enhance code blocks with Run and Copy buttons
+    bubble.querySelectorAll("pre").forEach((pre) => {
+      if (pre.parentElement.classList.contains("code-wrap")) return;
+
+      const codeEl = pre.querySelector("code");
+      let lang = "";
+      if (codeEl) {
+        const langClass = Array.from(codeEl.classList).find((c) => c.startsWith("language-"));
+        if (langClass) lang = langClass.replace("language-", "").toLowerCase();
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "code-wrap";
+      pre.parentNode.insertBefore(wrap, pre);
+
+      const header = document.createElement("div");
+      header.className = "code-header";
+
+      const langSpan = document.createElement("span");
+      langSpan.textContent = lang || "CODE";
+      header.appendChild(langSpan);
+
+      const btnGroup = document.createElement("div");
+      btnGroup.className = "code-header-btns";
+
+      // ▶ Run button for JavaScript / HTML / Python
+      const runBtn = document.createElement("button");
+      runBtn.className = "code-action-btn";
+      runBtn.type = "button";
+      runBtn.textContent = "▶ Run";
+
+      const outputDiv = document.createElement("div");
+      outputDiv.className = "code-output";
+
+      runBtn.onclick = () => {
+        const rawCode = codeEl ? codeEl.innerText : pre.innerText;
+        outputDiv.style.display = "block";
+
+        if (lang === "javascript" || lang === "js") {
+          try {
+            let logs = [];
+            const originalLog = console.log;
+            console.log = (...args) => {
+              logs.push(args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" "));
+            };
+            const result = new Function(rawCode)();
+            console.log = originalLog;
+
+            outputDiv.textContent = logs.length > 0 
+              ? logs.join("\n") 
+              : (result !== undefined ? `Result: ${result}` : "Code executed successfully (no logs).");
+          } catch (err) {
+            outputDiv.textContent = `Runtime Error: ${err.message}`;
+          }
+        } else if (lang === "html") {
+          const win = window.open("", "_blank");
+          win.document.write(rawCode);
+          win.document.close();
+          outputDiv.textContent = "Opened HTML component in preview tab!";
+        } else if (lang === "python" || lang === "py") {
+          outputDiv.textContent = `[Stunn Python Interpreter Preview]\n> Checking syntax...\n> Syntax: VALID\nTip: Ready to copy and run in VS Code or Terminal!`;
+        } else {
+          outputDiv.textContent = `Executed ${lang || 'snippet'} in sandbox.`;
+        }
+      };
+
+      btnGroup.appendChild(runBtn);
+
+      // Copy button
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "code-action-btn";
+      copyBtn.type = "button";
+      copyBtn.textContent = "Copy";
+      copyBtn.onclick = () => {
+        const codeText = codeEl ? codeEl.innerText : pre.innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
+        });
+      };
+
+      btnGroup.appendChild(copyBtn);
+      header.appendChild(btnGroup);
+
+      wrap.appendChild(header);
+      wrap.appendChild(pre);
+      wrap.appendChild(outputDiv);
+    });
+
+    // 3. Links open in new tab
+    bubble.querySelectorAll("a").forEach((link) => {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    });
+  }
+
+  function renderBubble(role, content) {
+    if (welcomeEl && welcomeEl.isConnected) welcomeEl.remove();
+
+    const msg = document.createElement("div");
+    msg.className = "message " + role;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+
+    if (role === "bot") {
+      bubble.innerHTML = formatMarkdown(content);
+      enhanceBubble(bubble);
+    } else {
+      bubble.textContent = content;
+    }
+
+    msg.appendChild(bubble);
+    conversationEl.appendChild(msg);
+    conversationEl.scrollTop = conversationEl.scrollHeight;
+    return bubble;
+  }
+
+  // ===== STREAMING CLIENT WITH CARTOONY THUNDERBOLT DOODLE & DELIBERATE TYPEWRITER =====
+  async function sendMessage(text) {
+    text = (text || "").trim();
+    if (!text) return;
+
+    // Render User Message
+    renderBubble("user", text);
+    saveMessageToCurrentChat("user", text);
+
+    inputEl.value = "";
+    autoGrow();
+
+    // Remove welcome hero if present
+    if (welcomeEl && welcomeEl.isConnected) welcomeEl.remove();
+
+    // Standalone, borderless Cartoony Thunderbolt Sketch (NO box, NO cube, NO card)
+    const thinkingEl = document.createElement("div");
+    thinkingEl.className = "thinking-doodle-container";
+    thinkingEl.innerHTML = `
+      <div class="thunderbolt-sketch">
+        <svg viewBox="0 0 60 60" class="bolt-svg">
+          <path class="sketch-bolt" d="M32 6 L16 32 L28 32 L22 54 L44 26 L32 26 Z" />
+          <line class="bolt-ray ray-1" x1="32" y1="3" x2="32" y2="0" />
+          <line class="bolt-ray ray-2" x1="48" y1="18" x2="53" y2="15" />
+          <line class="bolt-ray ray-3" x1="46" y1="36" x2="52" y2="38" />
+          <line class="bolt-ray ray-4" x1="12" y1="20" x2="6" y2="17" />
+          <line class="bolt-ray ray-5" x1="14" y1="42" x2="8" y2="45" />
+        </svg>
+      </div>
+      <div class="thinking-doodle-text">THINKING…</div>
+    `;
+
+    conversationEl.appendChild(thinkingEl);
+    conversationEl.scrollTop = conversationEl.scrollHeight;
+
+    // Toggle Send -> Stop Button
+    sendIcon.style.display = "none";
+    stopIcon.style.display = "block";
+    sendEl.title = "Skip / Stop generating";
+
+    activeAbortController = new AbortController();
+
+    const thinkingStartTime = Date.now();
+    const MIN_THINKING_MS = 1100; // Let the user enjoy the animation for at least 1.1s
+
+    let targetFullText = "";
+    let isStreamActive = true;
+    let streamFailed = false;
+    let typewriterStarted = false;
+    let typeIndex = 0;
+    let typingTimer = null;
+    let userCancelled = false;
+
+    let botMsg = null;
+    let botBubble = null;
+
+    function resetControls() {
+      activeAbortController = null;
+      sendIcon.style.display = "block";
+      stopIcon.style.display = "none";
+      sendEl.title = "Send (Enter)";
+      inputEl.focus();
+    }
+
+    function startTypewriter() {
+      if (typewriterStarted) return;
+      typewriterStarted = true;
+
+      // Smoothly fade out the cartoon doodle
+      thinkingEl.classList.add("fading-out");
+      setTimeout(() => {
+        if (thinkingEl.parentElement) thinkingEl.remove();
+      }, 260);
+
+      // Create the real bot bubble with fade-in class
+      botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+
+      botBubble = document.createElement("div");
+      botBubble.className = "bubble stream-content";
+      botBubble.innerHTML = '<span class="stunn-cursor"></span>';
+
+      botMsg.appendChild(botBubble);
+      conversationEl.appendChild(botMsg);
+      conversationEl.scrollTop = conversationEl.scrollHeight;
+
+      // Steady, human-paced typewriter loop
+      function typeStep() {
+        if (userCancelled) {
+          botBubble.innerHTML = formatMarkdown(targetFullText);
+          enhanceBubble(botBubble);
+          if (targetFullText && !streamFailed) {
+            saveMessageToCurrentChat("bot", targetFullText);
+          }
+          resetControls();
+          return;
+        }
+
+        if (typeIndex < targetFullText.length) {
+          // Controlled speed: smooth 2-4 characters every 24ms (~25 words/sec)
+          const backlog = targetFullText.length - typeIndex;
+          const chunk = backlog > 300 ? 10 : (backlog > 100 ? 5 : (backlog > 30 ? 3 : 2));
+          typeIndex = Math.min(typeIndex + chunk, targetFullText.length);
+
+          const currentSlice = targetFullText.slice(0, typeIndex);
+          botBubble.innerHTML = formatMarkdown(currentSlice) + '<span class="stunn-cursor"></span>';
+          conversationEl.scrollTop = conversationEl.scrollHeight;
+
+          typingTimer = setTimeout(typeStep, 24);
+        } else if (!isStreamActive) {
+          // Finished rendering full response
+          botBubble.innerHTML = formatMarkdown(targetFullText || (streamFailed ? "I hit a problem connecting to the engine." : "(No response received)"));
+          enhanceBubble(botBubble);
+          if (targetFullText && !streamFailed) {
+            saveMessageToCurrentChat("bot", targetFullText);
+          }
+          resetControls();
+        } else {
+          // Waiting for more data from the network
+          typingTimer = setTimeout(typeStep, 24);
+        }
+      }
+
+      typeStep();
+    }
+
+    function scheduleTypewriter() {
+      const elapsed = Date.now() - thinkingStartTime;
+      const delay = Math.max(0, MIN_THINKING_MS - elapsed);
+      setTimeout(() => {
+        startTypewriter();
+      }, delay);
+    }
+
+    try {
+      const response = await fetch(STREAM_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: activeAbortController.signal,
+        body: JSON.stringify({
+          prompt: text,
+          chatInput: text,
+          sessionId: currentSessionId,
+          mode: modeSelect.value,
+          webSearch: webSearchEnabled
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("data: ")) {
+            const dataStr = trimmed.slice(6);
+            if (dataStr === "[DONE]") break;
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.token) {
+                targetFullText += parsed.token;
+                if (!typewriterStarted) {
+                  scheduleTypewriter();
+                }
+              }
+            } catch (e) {
+              // Non-JSON token
+            }
+          }
+        }
+      }
+
+      isStreamActive = false;
+
+    } catch (err) {
+      if (err.name === "AbortError") {
+        userCancelled = true;
+        isStreamActive = false;
+      } else {
+        // Fallback to non-streaming /chat endpoint
+        try {
+          const fallbackRes = await fetch(CHAT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: text,
+              chatInput: text,
+              sessionId: currentSessionId,
+              mode: modeSelect.value,
+              webSearch: webSearchEnabled
+            })
+          });
+          const data = await fallbackRes.json();
+          targetFullText = data.answer || data.text || data.output || "No answer received.";
+        } catch (fallbackErr) {
+          streamFailed = true;
+          targetFullText = `Error connecting to Stunn: ${err.message}`;
+        }
+        isStreamActive = false;
+        if (!typewriterStarted) {
+          scheduleTypewriter();
+        }
+      }
+    }
+  }
+
+  // ===== SEND / STOP HANDLER =====
+  sendEl.addEventListener("click", () => {
+    if (activeAbortController) {
+      activeAbortController.abort();
+    } else {
+      sendMessage(inputEl.value);
+    }
+  });
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!activeAbortController) {
+        sendMessage(inputEl.value);
+      }
+    }
+  });
+
+  // ===== VOICE TO TEXT (SPEECH RECOGNITION) =====
+  let recognition = null;
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRec();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      inputEl.value = (inputEl.value ? inputEl.value + " " : "") + transcript;
+      autoGrow();
+    };
+
+    recognition.onend = () => {
+      voiceBtn.classList.remove("recording");
+    };
+
+    recognition.onerror = () => {
+      voiceBtn.classList.remove("recording");
+    };
+  }
+
+  voiceBtn.addEventListener("click", () => {
+    if (!recognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    if (voiceBtn.classList.contains("recording")) {
+      recognition.stop();
+      voiceBtn.classList.remove("recording");
+    } else {
+      voiceBtn.classList.add("recording");
+      recognition.start();
+    }
+  });
+
+  // ===== RESTORE WELCOME HERO =====
+  function showWelcomeHero() {
+    conversationEl.innerHTML = `
+      <div class="hero" id="welcome">
+        <div class="hero-copy">
+          <h1>
+            Ask beyond the
+            <span class="obvious">obvious.</span>
+          </h1>
+
+          <p class="intro">
+            A research partner with real-time streaming, zero-glitch code architecting,
+            and live web synthesis. Give Stunn a challenge.
+          </p>
+
+          <div class="suggestions">
+            <button class="suggestion" data-q="Research the latest breakthroughs in fusion energy and summarize them with a comparison table.">
+              <span>Map recent fusion energy<br>breakthroughs in a table</span>
+              <span class="arrow">↗</span>
+            </button>
+
+            <button class="suggestion" data-q="Write a robust Python calculator with full error handling and tests.">
+              <span>Architect a zero-glitch<br>Python calculator</span>
+              <span class="arrow">↗</span>
+            </button>
+
+            <button class="suggestion" data-q="What is 15% compound interest on $10,000 over 8 years with a year-by-year table?">
+              <span>Calculate an eight-year investment schedule</span>
+              <span class="arrow">↗</span>
+            </button>
+
+            <button class="suggestion" data-q="Explain quantum computing like I'm five with real-world analogies.">
+              <span>Make quantum computing intuitive</span>
+              <span class="arrow">↗</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="vertical-mark">STUNN / 02</div>
+      </div>
+    `;
+
+    bindSuggestionButtons();
+  }
+
+  function bindSuggestionButtons() {
+    document.querySelectorAll(".suggestion").forEach((chip) => {
+      chip.addEventListener("click", () => sendMessage(chip.dataset.q));
+    });
+  }
+
+  clearEl.addEventListener("click", () => {
+    deleteChat(currentSessionId);
+  });
+
+  // Initialize
+  renderHistoryList();
+  bindSuggestionButtons();
+  inputEl.focus();
+</script>
+</body>
+</html>

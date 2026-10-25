@@ -2,7 +2,7 @@
 
 ## 🌐 Live Demo & Deployment
 
-- **Frontend (Netlify):** [Launch Stunn](stunnai.netlify.app)
+- **Frontend (Netlify):** [](stunnai.netlify.app)
 - **Backend API (Render):** `YOUR_RENDER_URL`
 - **Backend Source Code:** [stunn-backend](https://github.com/VyomPROmax/stunn-backend)
 

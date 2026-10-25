@@ -1,69 +1,32 @@
-
 # ⚡ Stunn
 
-> Build something extraordinary.
+## 🌐 Live Demo & Deployment
 
-Stunn is a project built to explore ideas, experiment with technology, and create something unique.
+- **Frontend (Netlify):** [Launch Stunn](stunnai.netlify.app)
+- **Backend API (Render):** `YOUR_RENDER_URL`
+- **Backend Source Code:** [stunn-backend](https://github.com/VyomPROmax/stunn-backend)
 
-## ✨ Features
+## 🏗️ Architecture
 
-- 🚀 Simple and modern experience
-- 🎨 Clean, user-friendly design
-- ⚙️ Built with a focus on functionality
-- 🔧 Continuously evolving with new ideas and improvements
+Stunn uses a separately deployed frontend and backend.
 
-## 🛠️ Tech Stack
+- **Frontend:** Hosted on Netlify
+- **Backend:** Hosted on Render
+- **Source Control:** GitHub
+- **Communication:** Frontend connects to the backend through API requests
 
-<!-- Add your technologies here -->
-- Frontend: `Add your frontend`
-- Backend: `Add your backend`
-- Language: `Add your language`
+## 🚀 Deployment
 
-## 📸 Preview
+### Frontend
+The frontend is deployed on Netlify.
 
-<!-- Add a screenshot or GIF of Stunn here -->
+### Backend
+The backend source code is maintained on GitHub and deployed through Render.
 
-Coming soon...
+Changes pushed to the connected repository can trigger a new deployment, depending on the Render configuration.
 
-## 🚀 Getting Started
+## 🔒 Security
 
-### 1. Clone the repository
-
-```bash
-git clone YOUR_REPOSITORY_URL
-```
-
-### 2. Open the project
-
-```bash
-cd Stunn
-```
-
-### 3. Install dependencies
-
-Follow the installation instructions for your project's tech stack.
-
-### 4. Run the project
-
-Use the appropriate development command for your setup.
-
-## 🗺️ Roadmap
-
-- [ ] Core functionality
-- [ ] UI/UX improvements
-- [ ] Testing and optimization
-- [ ] New features and enhancements
-
-## 🤝 Contributing
-
-Have an idea to improve Stunn? Contributions, suggestions, and feedback are welcome.
-
-## 📄 License
-
-Add your preferred open-source license here.
-
----
-
-<p align="center">
-  <b>⚡ Stunn — Make it happen.</b>
-</p>
+- Keep API keys and secrets out of public repositories.
+- Store sensitive environment variables in the hosting platform.
+- Configure backend CORS to allow the intended frontend domain.

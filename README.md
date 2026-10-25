@@ -3,7 +3,7 @@
 ## 🌐 Live Demo & Deployment
 
 - **Frontend (Netlify):** [](stunnai.netlify.app)
-- **Backend API (Render):** `YOUR_RENDER_URL`
+- **Backend API (Render):** `https://stunn-tshm.onrender.com`
 - **Backend Source Code:** [stunn-backend](https://github.com/VyomPROmax/stunn-backend)
 
 ## 🏗️ Architecture

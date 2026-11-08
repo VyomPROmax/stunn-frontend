@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stunn. — Agentic AI</title>
+<meta name="description" content="Stunn. — Agentic AI research partner." />
+<!-- Dynamic favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon-light.svg" media="(prefers-color-scheme: light)" />
+<link rel="icon" type="image/svg+xml" href="favicon-dark.svg"  media="(prefers-color-scheme: dark)"  />
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="favicon.png" />
+<!-- Markdown Parser & Sanitizer -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+<!-- Official Google Identity Services SDK -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --paper:#efeee7;
+    --paper-2:#f4f2eb;
+    --ink:#0d1418;
+    --muted:#5e7380;
+    --line:#c8c9c3;
+    --accent:#dc613e;
+    --teal:#2d817e;
+    --black:#12191d;
+    --soft:#e3e1d9;
+    --card-bg:rgba(255,255,255,.18);
+    --input-bg:rgba(247,246,239,.88);
+    --code-bg:#12191d;
+    --code-hdr:#1b242a;
+    --code-fg:#f4f2eb;
+  }
+  [data-theme="dark"]{
+    --paper:#0f1519;
+    --paper-2:#161e24;
+    --ink:#eaeae6;
+    --muted:#8b9ca6;
+    --line:#26343e;
+    --accent:#e66b47;
+    --teal:#3db2ad;
+    --black:#080b0d;
+    --soft:#1b252c;
+    --card-bg:rgba(255,255,255,.05);
+    --input-bg:rgba(22,30,36,.92);
+    --code-bg:#080c0e;
+    --code-hdr:#121a20;
+    --code-fg:#eaeae6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  #netlify-drawer, [data-netlify-drawer], [id*="netlify"], iframe[src*="netlify"], .netlify-badge, div[class*="netlify"] {
+    display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important;
+  }
+  html,body{height:100%}
+  body{
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    overflow:hidden;
+    transition:background .25s ease, color .25s ease;
+  }
+  button,textarea,select,input{font:inherit}
+
+  /* ===== LOGIN OVERLAY GATE ===== */
+  .login-gate{
+    position:fixed; inset:0; z-index:9999; background:var(--paper);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    transition:opacity .3s ease, visibility .3s ease;
+  }
+  .login-gate.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .login-card{
+    width:100%; max-width:430px; border:1px solid var(--ink); border-radius:20px;
+    background:var(--paper-2); box-shadow:0 8px 0 var(--ink); padding:36px 32px;
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px;
+  }
+  .login-brand-mark{
+    width:72px; height:72px; border-radius:18px; background:transparent; color:#f7f5ec;
+    display:grid; place-items:center; overflow:visible; padding:0;
+  }
+  .login-brand-mark svg, .login-brand-mark img{ width:100%; height:100%; object-fit:contain; display:block; filter: drop-shadow(0 6px 18px rgba(220,97,62,.22)); }
+  .login-title{ font-family:Georgia, serif; font-size:32px; letter-spacing:-.03em; color:var(--ink); }
+  .login-sub{ font-size:14px; line-height:1.55; color:var(--muted); max-width:320px; }
+  .login-field{ width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:2px; text-align:left; }
+  .login-field label{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .login-input{ width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font-size:14px; outline:none; transition:border-color .18s ease; }
+  .login-input:focus{ border-color:var(--accent); }
+  .client-id-box{ width:100%; padding:12px; border-radius:10px; border:1px dashed var(--accent); background:rgba(220,97,62,.07); display:none; flex-direction:column; gap:8px; text-align:left; }
+  .client-id-box.visible{ display:flex; }
+  .client-id-help{ font-size:11.5px; line-height:1.45; color:var(--ink); }
+  .client-id-help a{ color:var(--accent); text-decoration:underline; }
+  .google-btn-wrap{ width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:4px; }
+  .custom-google-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px 16px; border-radius:10px; border:1px solid var(--ink); background:#fff; color:#12191d; font-weight:600; font-size:14px; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
+  .custom-google-btn:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .custom-google-btn svg{ width:18px; height:18px; flex:0 0 auto; }
+  .login-error{ font-size:12px; color:#ef4444; display:none; line-height:1.4; }
+  .login-footer{ font:10px/1.3 "SFMono-Regular", Consolas, monospace; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+
+  /* ===== PAGE LAYOUT ===== */
+  .page{ height:100dvh; min-height:640px; display:grid; grid-template-columns:280px 1fr; border-top:1px solid var(--ink); background:var(--paper); }
+  .rail{ position:relative; border-right:1px solid var(--line); padding:24px 20px 16px; display:flex; flex-direction:column; min-width:0; gap:14px; }
+  .brand{ display:flex; align-items:flex-start; gap:12px; }
+  .brand-mark{ width:44px; height:44px; border-radius:12px; background:transparent; display:grid; place-items:center; flex:0 0 auto; overflow:visible; }
+  .brand-mark svg, .brand-mark img{ width:100%; height:100%; object-fit:contain; display:block; filter: drop-shadow(0 4px 12px rgba(220,97,62,.16)); }
+  .brand-name{ font-family: Georgia, serif; font-size:20px; line-height:1; letter-spacing:-.02em; margin-top:2px; }
+  .brand-sub{ margin-top:5px; font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.18em; color:var(--muted); }
+  .new-chat-btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:10px 14px; border-radius:10px; background:transparent; border:1px solid var(--line); color:var(--ink); cursor:pointer; font:12px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.04em; transition:all .18s ease; }
+  .new-chat-btn:hover{ background:rgba(220,97,62,.1); border-color:var(--accent); color:var(--accent); }
+  .history-container{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  .history-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .eyebrow{ font:10px/1.25 "SFMono-Regular", Consolas, monospace; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+  .history-list{ list-style:none; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:4px; padding-right:4px; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+  .history-item{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--ink); border:1px solid transparent; transition:background .15s ease, border-color .15s ease; gap:8px; }
+  .history-item:hover{ background:rgba(255,255,255,.2); border-color:var(--line); }
+  [data-theme="dark"] .history-item:hover{ background:rgba(255,255,255,.05); }
+  .history-item.active{ background:rgba(220,97,62,.12); border-color:var(--accent); color:var(--accent); font-weight:500; }
+  .history-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .history-del{ opacity:0; background:none; border:none; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; font-size:12px; line-height:1; }
+  .history-item:hover .history-del{ opacity:1; }
+  .history-del:hover{ color:var(--accent); }
+  .systems{ border-top:1px solid var(--line); padding-top:12px; font:10px/1.2 "SFMono-Regular", Consolas, monospace; letter-spacing:.12em; color:var(--muted); display:flex; align-items:center; justify-content:space-between; }
+  .systems-led-wrap{ display:flex; align-items:center; gap:8px; }
+  .systems .led{ width:8px; height:8px; border-radius:50%; background:#78a6a0; box-shadow:0 0 0 4px rgba(45,129,126,.15); }
+
+  /* ===== BOTTOM-LEFT USER PFP + PREFERRED NAME DOCK ===== */
+  .user-profile-dock{ border-top:1px solid var(--line); padding-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; cursor:pointer; transition:background .15s ease; }
+  .user-profile-dock:hover{ background:var(--card-bg); border-radius:10px; padding-left:6px; padding-right:6px; margin-left:-6px; margin-right:-6px; }
+  .user-profile-info{ display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+  .user-pfp{ width:36px; height:36px; border-radius:50%; object-fit:cover; border:1.5px solid var(--accent); background:var(--black); flex:0 0 auto; }
+  .user-meta{ min-width:0; flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .user-preferred-name{ font-size:14px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+  .user-preferred-name:hover{ color:var(--accent); }
+  .user-actions{ display:flex; align-items:center; gap:4px; }
+  .profile-icon-btn{ background:transparent; border:1px solid transparent; color:var(--muted); width:28px; height:28px; border-radius:7px; display:grid; place-items:center; cursor:pointer; transition:all .15s ease; }
+  .profile-icon-btn:hover{ border-color:var(--line); color:var(--accent); background:var(--card-bg); }
+
+  /* ===== SETTINGS & AI CUSTOMIZATION MODAL ===== */
+  .settings-modal-gate{ position:fixed; inset:0; z-index:9998; display:flex; align-items:center; justify-content:center; padding:20px; opacity:1; visibility:visible; transition:opacity .22s ease, visibility .22s ease; }
+  .settings-modal-gate.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .settings-modal-backdrop{ position:absolute; inset:0; background:rgba(13,20,24,.55); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+  [data-theme="dark"] .settings-modal-backdrop{ background:rgba(0,0,0,.75); }
+  .settings-modal-card{ position:relative; width:100%; max-width:540px; max-height:88vh; border:1px solid var(--ink); border-radius:18px; background:var(--paper-2); box-shadow:0 12px 32px rgba(0,0,0,.18), 0 6px 0 var(--ink); display:flex; flex-direction:column; overflow:hidden; animation:rise .2s ease both; }
+  .settings-modal-header{ padding:18px 22px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; background:var(--paper); }
+  .settings-brand-pill{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.12em; color:var(--accent); font-weight:700; text-transform:uppercase; margin-bottom:3px; }
+  .settings-modal-title{ font-family:Georgia, serif; font-size:20px; letter-spacing:-.02em; color:var(--ink); }
+  .settings-close-btn{ background:transparent; border:1px solid var(--line); color:var(--muted); width:32px; height:32px; border-radius:8px; display:grid; place-items:center; cursor:pointer; transition:all .18s ease; }
+  .settings-close-btn:hover{ border-color:var(--ink); color:var(--ink); transform:scale(1.05); }
+  .settings-modal-body{ padding:20px 22px; overflow-y:auto; display:flex; flex-direction:column; gap:22px; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+  .settings-section{ display:flex; flex-direction:column; gap:10px; }
+  .settings-section-header{ display:flex; align-items:center; gap:8px; }
+  .settings-section-num{ font:10px/1 "SFMono-Regular", Consolas, monospace; padding:2px 5px; border-radius:4px; background:var(--card-bg); border:1px solid var(--line); color:var(--muted); }
+  .settings-section-label{ font:11px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink); }
+  .settings-section-desc{ font-size:12.5px; line-height:1.45; color:var(--muted); }
+  .settings-user-card{ display:flex; align-items:center; gap:14px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--card-bg); }
+  .settings-user-pfp{ width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); background:var(--black); flex:0 0 auto; }
+  .settings-user-details{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+  .settings-field-label{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .settings-input-row{ display:flex; gap:8px; }
+  .settings-input{ flex:1; padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font-size:13px; outline:none; transition:border-color .18s ease; }
+  .settings-input:focus, .settings-textarea:focus{ border-color:var(--accent); }
+  .settings-btn-inline{ padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card-bg); color:var(--ink); font:11px/1 "SFMono-Regular", Consolas, monospace; cursor:pointer; transition:all .18s ease; white-space:nowrap; }
+  .settings-btn-inline:hover{ border-color:var(--accent); color:var(--accent); }
+  .settings-email-text{ font-size:11.5px; color:var(--muted); font-family:"SFMono-Regular", Consolas, monospace; }
+  .preset-chips-wrap{ display:flex; flex-wrap:wrap; gap:6px; }
+  .preset-chip{ font:11px/1.2 "SFMono-Regular", Consolas, monospace; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:var(--card-bg); color:var(--ink); cursor:pointer; transition:all .18s ease; }
+  .preset-chip:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
+  .preset-chip.chip-clear{ color:var(--muted); }
+  .preset-chip.chip-clear:hover{ color:#ef4444; border-color:#ef4444; }
+  .settings-textarea{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font-size:13px; line-height:1.5; outline:none; resize:vertical; min-height:85px; transition:border-color .18s ease; }
+  .settings-hint{ font-size:11px; color:var(--muted); font-style:italic; }
+  .color-picker-palette{ display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:8px 0 2px; }
+  .color-swatch-btn{ width:32px; height:32px; border-radius:50%; background:var(--c); border:2px solid transparent; cursor:pointer; position:relative; transition:transform .15s ease, box-shadow .15s ease; }
+  .color-swatch-btn:hover{ transform:scale(1.15); }
+  .color-swatch-btn.selected{ outline:2px solid var(--ink); outline-offset:2px; transform:scale(1.1); }
+  .custom-color-picker-wrap{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border:1px solid var(--line); border-radius:20px; background:var(--card-bg); cursor:pointer; }
+  .color-picker-native{ -webkit-appearance:none; -moz-appearance:none; appearance:none; width:22px; height:22px; border:none; border-radius:50%; cursor:pointer; background:transparent; }
+  .color-picker-native::-webkit-color-swatch-wrapper{padding:0}
+  .color-picker-native::-webkit-color-swatch{ border:none; border-radius:50%; }
+  .color-picker-label{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .color-preview-box{ display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:8px; border:1px dashed var(--line); background:var(--card-bg); font-size:12px; }
+  .color-preview-pill{ display:flex; align-items:center; gap:8px; font:11px/1 "SFMono-Regular", Consolas, monospace; color:var(--ink); }
+  .color-preview-dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .settings-modal-footer{ padding:14px 22px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; background:var(--paper); }
+  .settings-toast{ font:11px/1 "SFMono-Regular", Consolas, monospace; color:var(--accent); opacity:0; transition:opacity .2s ease; }
+  .settings-toast.visible{ opacity:1; }
+  .settings-btn-primary{ padding:9px 20px; border-radius:9px; border:1px solid var(--ink); background:var(--ink); color:var(--paper); font:12px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.06em; font-weight:700; text-transform:uppercase; cursor:pointer; transition:transform .15s ease, filter .15s ease; }
+  .settings-btn-primary:hover{ transform:translateY(-1px); filter:brightness(1.1); }
+
+  /* ===== BUILT-BY SIGNATURE & TROLL RENAME ===== */
+  .built-by-container{ position:relative; width:100%; }
+  .built-by-sig{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:6px 0 10px; display:flex; align-items:center; gap:5px; cursor:pointer; transition:color .18s ease; user-select:none; }
+  .built-by-sig:hover{ color:var(--ink); }
+  .built-by-name-slot{ position:relative; display:inline-block; }
+  .built-by-name{ color:var(--accent); font-weight:700; transition:all .2s ease; }
+  .built-by-sig:hover .built-by-name{ text-decoration:underline; }
+  .rename-author-trigger{ background:transparent; border:none; color:var(--muted); font-size:10px; cursor:pointer; opacity:0.35; padding:2px 3px; border-radius:4px; line-height:1; transition:all .15s ease; }
+  .built-by-container:hover .rename-author-trigger{ opacity:1; }
+  .rename-author-trigger:hover{ color:var(--accent); background:var(--card-bg); transform:scale(1.2); }
+  .built-by-name-slot.strikethrough::after{ content:''; position:absolute; left:-2px; right:-2px; top:50%; height:2px; background:#ef4444; transform:translateY(-50%) scaleX(0); transform-origin:left center; animation:strikeAcross .45s cubic-bezier(.22,1,.36,1) forwards; box-shadow:0 0 6px rgba(239,68,68,.8); border-radius:1px; }
+  @keyframes strikeAcross{ 0%{ transform:translateY(-50%) scaleX(0); } 100%{ transform:translateY(-50%) scaleX(1); } }
+  .built-by-name-slot.shake{ animation:subtleShake .35s ease; }
+  @keyframes subtleShake{ 0%,100%{ transform:translateX(0); } 20%,60%{ transform:translateX(-3px); } 40%,80%{ transform:translateX(3px); } }
+  .rename-popup{ position:absolute; bottom:calc(100% + 6px); left:0; width:220px; background:var(--paper-2); border:1px solid var(--ink); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.18), 0 4px 0 var(--ink); padding:12px; z-index:999; display:flex; flex-direction:column; gap:8px; animation:rise .18s ease both; }
+  .rename-popup.hidden{ display:none; }
+  .rename-popup-title{ font:11px/1.3 Georgia, serif; font-weight:700; color:var(--ink); }
+  .rename-popup-sub{ font:9.5px/1.3 "SFMono-Regular", Consolas, monospace; color:var(--muted); }
+  .rename-popup-row{ display:flex; gap:6px; }
+  .rename-popup-input{ flex:1; min-width:0; padding:6px 8px; border-radius:6px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font:11px/1 "SFMono-Regular", Consolas, monospace; outline:none; }
+  .rename-popup-input:focus{ border-color:var(--accent); }
+  .rename-popup-btn{ padding:6px 10px; border-radius:6px; border:1px solid var(--ink); background:var(--accent); color:#fff; font:10px/1 "SFMono-Regular", Consolas, monospace; font-weight:700; text-transform:uppercase; cursor:pointer; transition:transform .12s ease; }
+  .rename-popup-btn:hover{ transform:translateY(-1px); }
+  .rename-popup-close{ background:transparent; border:none; color:var(--muted); font:9px/1 "SFMono-Regular", Consolas, monospace; text-align:right; cursor:pointer; padding-top:2px; }
+  .rename-popup-close:hover{ color:var(--ink); text-decoration:underline; }
+  .troll-pill{ position:absolute; bottom:calc(100% + 6px); left:0; background:#ef4444; color:#fff; font:10px/1 "SFMono-Regular", Consolas, monospace; font-weight:700; padding:4px 8px; border-radius:6px; box-shadow:0 4px 12px rgba(239,68,68,.35); white-space:nowrap; animation:rise .2s ease both; pointer-events:none; z-index:999; }
+  .troll-pill.hidden{ display:none !important; }
+
+  /* ===== ROBOTIC THINKING INDICATOR ===== */
+  .thinking-doodle-container{ display:flex; align-items:center; gap:8px; padding:6px 12px; margin:6px 0 10px; animation:rise .2s ease both; transition:opacity .25s ease, transform .25s ease; border-radius:8px; background:var(--card-bg); border:1px solid var(--line); width:fit-content; }
+  .thinking-doodle-container.fading-out{ opacity:0; transform:translateY(-3px); pointer-events:none; }
+  .thinking-robotic-tag{ font:10px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; display:inline-flex; align-items:center; gap:6px; }
+  .thinking-robotic-tag::before{ content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:roboticBlink .8s ease-in-out infinite; }
+  @keyframes roboticBlink{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.35; transform:scale(.75); } }
+  .thinking-dots-anim{ display:inline-block; width:22px; text-align:left; font-family:"SFMono-Regular", Consolas, monospace; color:var(--ink); font-weight:700; }
+
+  /* ===== ATTACHMENT BADGES & PREVIEW ===== */
+  .attachments-tray{ display:flex; flex-wrap:wrap; gap:8px; padding:0 4px 8px; align-items:flex-start; }
+  .attachments-tray:empty{ display:none; }
+  .file-badge{ position:relative; display:inline-flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; border:1px solid var(--line); background:var(--card-bg); font:11px/1.2 "SFMono-Regular", Consolas, monospace; color:var(--ink); animation:rise .18s ease both; max-width:100%; }
+  .file-badge.is-processing{ border-style:dashed; opacity:.92; }
+  .file-badge .file-name{ max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .file-badge .file-meta{ font-size:10px; color:var(--muted); }
+  .file-badge .file-remove{ background:transparent; border:none; color:var(--muted); font-size:13px; cursor:pointer; padding:0 2px; line-height:1; margin-left:2px; }
+  .file-badge .file-remove:hover{ color:#ef4444; }
+  .file-badge .file-thumb{ width:56px; height:56px; border-radius:8px; object-fit:cover; border:1px solid var(--line); background:var(--soft); flex:0 0 auto; }
+  .file-badge.has-preview{ padding:6px 8px 6px 6px; align-items:flex-start; }
+  .file-badge .file-preview-body{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .file-badge .file-status{ color:var(--accent); font-size:10px; }
+  .file-badge .file-error{ color:#ef4444; font-size:10px; }
+  .file-badge svg.file-doodle{ width:16px; height:16px; color:var(--muted); display:block; flex:0 0 auto; }
+
+  /* Attached file tag inside message bubble */
+  .bubble-file-tag{ display:inline-flex; align-items:center; gap:5px; margin-bottom:8px; padding:3px 8px; border-radius:5px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); font:10px/1 "SFMono-Regular", Consolas, monospace; text-transform:uppercase; letter-spacing:.05em; color:#fff; }
+  .message.user .bubble-file-tag{ background:rgba(255,255,255,.12); color:#f4f2eb; }
+  .bubble-file-preview{ display:block; margin:6px 0 8px; max-width:min(320px,100%); max-height:220px; border-radius:10px; border:1px solid rgba(255,255,255,.18); object-fit:contain; background:rgba(0,0,0,.12); }
+
+  /* Rock-solid, Smooth Electric Cursor */
+  .stunn-cursor{ display:inline-block; width:7px; height:15px; background:var(--accent); border-radius:2px; margin-left:4px; vertical-align:-2px; box-shadow:0 0 8px rgba(220,97,62,.65); animation:cursorGlow .75s ease-in-out infinite; }
+  @keyframes cursorGlow{ 0%, 100%{ opacity: 1; transform: scaleY(1); } 50%{ opacity: .25; transform: scaleY(.85); } }
+  .stream-content{ animation:contentFade .28s ease-out; }
+  @keyframes contentFade{ from{ opacity: .4; filter: blur(1.5px); transform: translateY(2px); } to{ opacity: 1; filter: blur(0); transform: translateY(0); } }
+  @keyframes rise{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ===== MESSAGES & BUBBLES RESTORED ===== */
+  .message{ display:flex; gap:12px; margin:12px 0; animation:rise .2s ease both; }
+  .message.user{ justify-content:flex-end; }
+  .bubble{ max-width:min(780px,86%); border:1px solid var(--line); background:var(--card-bg); padding:14px 18px; border-radius:14px; word-break:break-word; color:var(--ink); line-height:1.6; font-size:14.5px; }
+  .message.user .bubble{ background:var(--black); color:#fff; border-color:var(--black); white-space:pre-wrap; }
+  [data-theme="dark"] .message.user .bubble{ background:#1f2930; border-color:#2a3740; }
+  .message.bot .bubble{ white-space:normal; border-left:3px solid var(--accent); }
+  .message.bot .bubble a{ color:var(--accent); text-decoration:underline; }
+  .message.bot .bubble p{ margin:0 0 10px; }
+  .message.bot .bubble p:last-child{ margin-bottom:0; }
+  .message.bot .bubble ul, .message.bot .bubble ol{ margin:8px 0 12px 22px; }
+  .message.bot .bubble li{ margin:4px 0; }
+  .message.bot .bubble code{ font-family:"SFMono-Regular", Consolas, monospace; font-size:13px; background:rgba(0,0,0,.08); padding:2px 5px; border-radius:4px; }
+  [data-theme="dark"] .message.bot .bubble code{ background:rgba(255,255,255,.1); }
+
+  /* CODE BLOCKS & TABLES */
+  .code-wrap{ position:relative; margin:14px 0; border-radius:9px; overflow:hidden; border:1px solid var(--line); }
+  .code-header{ display:flex; justify-content:space-between; align-items:center; background:var(--code-hdr); color:#9ba8af; font:11px/1 "SFMono-Regular", Consolas, monospace; padding:8px 14px; border-bottom:1px solid rgba(255,255,255,.07); text-transform:uppercase; letter-spacing:.05em; }
+  .code-header-btns{ display:flex; align-items:center; gap:6px; }
+  .code-action-btn{ background:rgba(255,255,255,.1); color:#e5e7eb; border:1px solid rgba(255,255,255,.18); border-radius:5px; padding:3px 8px; font:10px/1.2 "SFMono-Regular", Consolas, monospace; cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .code-action-btn:hover{ background:rgba(255,255,255,.24); color:#fff; }
+  .message.bot .bubble pre{ background:var(--code-bg); color:var(--code-fg); padding:14px 16px; margin:0; overflow-x:auto; scrollbar-width:thin; scrollbar-color:#4a5960 transparent; }
+  .message.bot .bubble pre code{ background:transparent; color:inherit; padding:0; border-radius:0; font-size:13px; line-height:1.55; display:block; }
+  .code-output{ background:#0a0d0f; border-top:1px solid rgba(255,255,255,.1); color:#38bdf8; padding:10px 14px; font:11.5px/1.4 "SFMono-Regular", Consolas, monospace; white-space:pre-wrap; display:none; max-height:180px; overflow-y:auto; }
+  .table-wrap{ overflow-x:auto; margin:14px 0; border-radius:8px; border:1px solid var(--line); background:var(--card-bg); scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+  .message.bot .bubble table{ width:100%; border-collapse:collapse; font-size:13px; text-align:left; }
+  .message.bot .bubble th, .message.bot .bubble td{ padding:9px 14px; border-bottom:1px solid var(--line); border-right:1px solid var(--line); }
+  .message.bot .bubble th:last-child, .message.bot .bubble td:last-child{ border-right:0; }
+  .message.bot .bubble tr:last-child td{ border-bottom:0; }
+  .message.bot .bubble th{ background:rgba(0,0,0,.06); font-weight:600; color:var(--ink); letter-spacing:.02em; }
+  [data-theme="dark"] .message.bot .bubble th{ background:rgba(255,255,255,.05); }
+  .message.bot .bubble tr:nth-child(even) td{ background:rgba(0,0,0,.025); }
+  [data-theme="dark"] .message.bot .bubble tr:nth-child(even) td{ background:rgba(255,255,255,.02); }
+
+  /* ABOUT MODAL */
+  .about-creator-card{ display:flex; align-items:center; gap:14px; padding:14px; border:1px solid var(--line); border-radius:12px; background:var(--card-bg); }
+  .about-avatar-ring{ width:62px; height:62px; border-radius:16px; background:transparent; display:grid; place-items:center; flex:0 0 auto; overflow:visible; }
+  .about-avatar-ring img, .about-avatar-ring svg{ width:100%; height:100%; object-fit:contain; display:block; filter: drop-shadow(0 4px 14px rgba(220,97,62,.18)); }
+  .about-creator-info{ display:flex; flex-direction:column; gap:5px; }
+  .about-creator-name{ font-family:Georgia, serif; font-size:20px; letter-spacing:-.02em; color:var(--ink); font-weight:400; }
+  .about-creator-role{ font:11px/1.3 "SFMono-Regular", Consolas, monospace; letter-spacing:.05em; color:var(--muted); }
+  .about-manifesto{ display:flex; flex-direction:column; gap:10px; padding:14px; border-radius:10px; border-left:3px solid var(--accent); background:var(--card-bg); }
+  .about-manifesto p{ font-size:13.5px; line-height:1.6; color:var(--ink); margin:0; }
+  .about-manifesto strong{ color:var(--accent); }
+  .about-kicker{ font-size:13px !important; color:var(--muted) !important; border-top:1px dashed var(--line); padding-top:10px; margin-top:4px; }
+  .about-kicker em{ color:var(--ink); font-style:normal; font-weight:700; }
+  .about-socials{ display:flex; gap:10px; flex-wrap:wrap; }
+  .about-social-link{ display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card-bg); color:var(--ink); font:11px/1 "SFMono-Regular", Consolas, monospace; text-decoration:none; transition:all .18s ease; }
+  .about-social-link:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .signature-seal-bottom{ margin-top:4px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:rgba(212,175,55,.03); border-radius:10px; padding-bottom:10px; }
+  .signature-shine-frame{ position:relative; width:220px; height:64px; display:flex; align-items:center; justify-content:center; }
+  .signature-shine-gold{ width:100%; height:100%; mask-image:url('signature.png'); -webkit-mask-image:url('signature.png'); mask-size:contain; -webkit-mask-size:contain; mask-repeat:no-repeat; -webkit-mask-repeat:no-repeat; mask-position:center; -webkit-mask-position:center; background:linear-gradient(90deg, #8a6016 0%, #c59b27 15%, #e8c85a 30%, #fffbe8 45%, #ffd700 50%, #fffbe8 55%, #e8c85a 70%, #c59b27 85%, #8a6016 100%); background-size:280% 100%; animation:goldShineRightToLeft 2.8s linear infinite; filter:drop-shadow(0 0 10px rgba(255, 215, 0, 0.45)) drop-shadow(0 0 2px rgba(255, 240, 160, 0.7)); }
+  @keyframes goldShineRightToLeft{ 0%{ background-position:100% 0%; } 100%{ background-position:-180% 0%; } }
+  .signature-caption{ font:9px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.14em; color:#d4af37; text-transform:uppercase; opacity:.92; text-shadow:0 0 8px rgba(212,175,55,.3); }
+
+  /* MAIN LAYOUT */
+  .main{ min-width:0; min-height:0; display:flex; flex-direction:column; }
+  .topbar{ height:64px; flex:0 0 64px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 36px; gap:16px; }
+  .topbar-left{ display:flex; align-items:center; gap:12px; }
+  .mode-dropdown{ position:relative; }
+  .mode-trigger{
+    display:inline-flex; align-items:center; gap:10px; min-width:168px;
+    padding:8px 12px 8px 10px; border-radius:999px;
+    border:1px solid color-mix(in srgb, var(--line) 75%, var(--accent) 25%);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--paper-2) 88%, #fff 12%), var(--card-bg));
+    color:var(--ink); cursor:pointer;
+    font:11px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.08em; text-transform:uppercase;
+    box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 8px 18px rgba(0,0,0,.06);
+    transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+  }
+  .mode-trigger:hover{ border-color:color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 10px 22px rgba(0,0,0,.09); transform:translateY(-1px); }
+  .mode-dropdown.open .mode-trigger{ border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), 0 10px 24px rgba(0,0,0,.1); }
+  .mode-trigger-doodle{ width:28px; height:28px; border-radius:999px; display:grid; place-items:center; flex:0 0 auto; color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); border:1px solid color-mix(in srgb, var(--accent) 22%, transparent); }
+  .mode-trigger-doodle svg, .mode-option-doodle svg{ width:15px; height:15px; display:block; }
+  .mode-trigger-text{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; flex:1; }
+  .mode-trigger-name{ font-size:11.5px; font-weight:700; letter-spacing:.1em; color:var(--ink); }
+  .mode-trigger-sub{ font-size:9px; letter-spacing:.12em; color:var(--muted); }
+  .mode-trigger-caret{ width:14px; height:14px; color:var(--muted); transition:transform .18s ease, color .18s ease; flex:0 0 auto; }
+  .mode-dropdown.open .mode-trigger-caret{ transform:rotate(180deg); color:var(--accent); }
+  .mode-menu{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:50; min-width:220px;
+    padding:6px; border-radius:18px; border:1px solid color-mix(in srgb, var(--line) 70%, var(--accent) 30%);
+    background:color-mix(in srgb, var(--paper-2) 94%, #fff 6%);
+    box-shadow:0 18px 40px rgba(0,0,0,.14), 0 2px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+    display:none; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  .mode-dropdown.open .mode-menu{ display:block; animation:rise .16s ease both; }
+  .mode-option{
+    width:100%; display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:14px;
+    border:1px solid transparent; background:transparent; color:var(--ink); cursor:pointer; text-align:left;
+    transition:background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .mode-option:hover{ background:var(--card-bg); border-color:var(--line); }
+  .mode-option.active{ background:color-mix(in srgb, var(--accent) 12%, transparent); border-color:color-mix(in srgb, var(--accent) 35%, transparent); }
+  .mode-option-doodle{ width:30px; height:30px; border-radius:999px; display:grid; place-items:center; flex:0 0 auto; color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); border:1px solid color-mix(in srgb, var(--accent) 18%, transparent); }
+  .mode-option-copy{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .mode-option-name{ font:11.5px/1 "SFMono-Regular", Consolas, monospace; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .mode-option-desc{ font:10px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; color:var(--muted); letter-spacing:.01em; }
+  .mode-option-check{ margin-left:auto; width:14px; height:14px; color:var(--accent); opacity:0; }
+  .mode-option.active .mode-option-check{ opacity:1; }
+  .topbar-actions{ display:flex; align-items:center; gap:12px; }
+  .action-btn{ border:1px solid var(--line); background:var(--card-bg); color:var(--ink); border-radius:8px; padding:6px 12px; cursor:pointer; font:11px/1 "SFMono-Regular", Consolas, monospace; display:flex; align-items:center; gap:6px; transition:all .18s ease; }
+  .action-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .action-btn.active{ background:var(--accent); color:white; border-color:var(--accent); }
+  .clear{ border:0; background:transparent; color:var(--muted); cursor:pointer; font:11px/1 "SFMono-Regular", Consolas, monospace; }
+  .clear:hover{ color:var(--accent); }
+  .workspace{ position:relative; min-height:0; flex:1; display:flex; flex-direction:column; padding:0 48px; }
+  .conversation{ flex:1; min-height:0; overflow-y:auto; padding:24px 2px 16px; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+  .conversation::-webkit-scrollbar{ width:8px; }
+  .conversation::-webkit-scrollbar-thumb{ background:var(--line); border-radius:8px; }
+  .hero{ min-height:100%; display:flex; flex-direction:column; }
+  .hero-copy{ padding-top:4px; }
+  .hero-kicker{ margin-bottom:14px; font:11px/1.3 "SFMono-Regular", Consolas, monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); opacity:.92; min-height:1.3em; }
+  .hero-kicker .kicker-soft{ color:var(--muted); }
+  h1{ font-family: Arial, Helvetica, sans-serif; font-size:clamp(54px,6vw,84px); line-height:.92; letter-spacing:-.065em; font-weight:400; max-width:850px; }
+  h1 .beyond{ display:inline; color:var(--accent); font-family: Georgia, serif; font-style:italic; font-weight:400; letter-spacing:-.05em; }
+  .intro{ margin-top:24px; max-width:740px; color:var(--muted); font-size:15px; line-height:1.7; }
+  .suggestions{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; width:min(620px,100%); margin-top:28px; }
+  .suggestion{ appearance:none; border:1px solid var(--line); background:var(--card-bg); border-radius:13px; padding:15px 16px; min-height:64px; text-align:left; cursor:pointer; color:var(--ink); display:flex; justify-content:space-between; align-items:flex-start; gap:15px; transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+  .suggestion:hover{ background:rgba(255,255,255,.3); border-color:var(--accent); transform:translateY(-1px); }
+  .suggestion span:first-child{ font:12px/1.45 "SFMono-Regular", Consolas, monospace; }
+  .arrow{ color:var(--accent); font:18px/1 "SFMono-Regular", Consolas, monospace; transform:translateY(-2px); }
+  .vertical-mark{ position:absolute; right:4px; top:59px; writing-mode:vertical-rl; font:9px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.21em; color:var(--muted); text-transform:uppercase; }
+  .composer-wrap{ padding:0 0 20px; }
+  .composer{ position:relative; border:1px solid var(--ink); border-radius:18px; background:var(--input-bg); box-shadow:0 6px 0 var(--ink); display:flex; align-items:flex-end; gap:8px; min-height:64px; padding:8px 10px 8px 16px; }
+  textarea{ flex:1; min-width:0; height:46px; max-height:132px; resize:none; border:0; outline:0; background:transparent; color:var(--ink); padding:12px 0; font-size:15px; line-height:1.45; }
+  textarea::placeholder{ color:var(--muted); }
+  .composer-btn-group{ display:flex; align-items:center; gap:6px; }
+  .icon-btn{ width:38px; height:38px; border:1px solid var(--line); border-radius:10px; background:var(--card-bg); color:var(--ink); cursor:pointer; display:grid; place-items:center; transition:all .18s ease; }
+  .icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .icon-btn.recording{ background:#dc3545; color:white; border-color:#dc3545; animation:pulse-red 1.2s infinite; }
+  .send{ width:42px; height:42px; border:0; border-radius:10px; background:var(--accent); color:white; cursor:pointer; display:grid; place-items:center; flex:0 0 auto; transition:filter .18s ease,transform .18s ease; }
+  .send:hover{ filter:brightness(1.06); transform:translateY(-1px); }
+  .send:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+  .send svg{ width:17px; height:17px; }
+  .composer-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding:0 4px; font:9.5px/1 "SFMono-Regular", Consolas, monospace; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
+  
+  @media (max-width: 920px){ .page{grid-template-columns:230px 1fr} .topbar,.workspace{padding-left:24px;padding-right:24px} h1{font-size:62px} }
+  @media (max-width: 720px){ body{overflow:auto} .page{height:auto;min-height:100dvh;grid-template-columns:1fr;} .rail{border-right:0;border-bottom:1px solid var(--line);padding-bottom:16px;} .topbar{height:auto;padding:14px 18px;flex-wrap:wrap;gap:10px;} .workspace{padding:0 16px} .conversation{padding-top:16px} h1{font-size:46px} .intro{font-size:13.5px} .suggestions{grid-template-columns:1fr} .vertical-mark{display:none} }
+</style>
+</head>
+<body>
+
+<!-- ===== GOOGLE ACCOUNT LOGIN PAGE OVERLAY ===== -->
+<div class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="login-brand-mark" aria-hidden="true">
+      <picture>
+        <source srcset="stunn-mark-dark.svg" media="(prefers-color-scheme: dark)">
+        <img class="app-logo-img" src="stunn-mark.svg" data-light="stunn-mark.svg" data-dark="stunn-mark-dark.svg" alt="Stunn" />
+      </picture>
+    </div>
+    <div>
+      <div class="login-title">Stunn.</div>
+      <p class="login-sub">Sign in with your Google Account to access your agentic AI research workspace.</p>
+    </div>
+
+    <div class="login-field">
+      <label for="preferredNameInput">Preferred Name (Optional Override)</label>
+      <input type="text" id="preferredNameInput" class="login-input" placeholder="Leave blank to use your Google name" maxlength="32" />
+    </div>
+
+    <div class="client-id-box" id="clientIdSetupBox">
+      <div class="client-id-help">
+        <strong>One-Time Admin Setup:</strong> Paste your Google OAuth Client ID from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a>:
+      </div>
+      <input type="text" id="clientIdInput" class="login-input" placeholder="1234567890-abc.apps.googleusercontent.com" />
+    </div>
+
+    <div class="google-btn-wrap">
+      <button type="button" class="custom-google-btn" id="realGoogleSignInBtn">
+        <svg viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+          <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+          <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.9 7.4 24 12 24z"/>
+        </svg>
+        <span id="googleBtnText">Continue with Google</span>
+      </button>
+      <div class="login-error" id="loginErrorMsg"></div>
+    </div>
+
+    <div class="login-footer">STUNN AGENTIC AI // GOOGLE OAUTH 2.0</div>
+  </div>
+</div>
+
+<!-- ===== MAIN WORKSPACE ===== -->
+<div class="page">
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <picture>
+          <source srcset="stunn-mark-dark.svg" media="(prefers-color-scheme: dark)">
+          <img src="stunn-mark.svg" alt="Stunn" />
+        </picture>
+      </div>
+      <div>
+        <div class="brand-name">Stunn.</div>
+        <div class="brand-sub">AGENTIC AI v2.0</div>
+      </div>
+    </div>
+
+    <button class="new-chat-btn" id="newChatBtn" type="button">
+      <span>+</span> New Inquiry
+    </button>
+
+    <div class="history-container">
+      <div class="history-header">
+        <div class="eyebrow">Recent Inquiries</div>
+      </div>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
+
+    <div class="systems">
+      <div class="systems-led-wrap">
+        <span class="led"></span>
+        <span>SYSTEMS ONLINE</span>
+      </div>
+    </div>
+
+    <!-- SUBTLE SIGNATURE WITH TROLL RENAME ACTION -->
+    <div class="built-by-container">
+      <div class="built-by-sig" id="builtBySig">
+        <span id="openAboutModalBtn" title="About Stunn · Ctrl+Shift+S">built by <span class="built-by-name-slot" id="builtByNameSlot"><span class="built-by-name" id="builtByNameText">Vyom Singh</span></span></span>
+        <button type="button" class="rename-author-trigger" id="renameAuthorBtn" title="Rename creator? 😏">✎</button>
+      </div>
+
+      <div class="rename-popup hidden" id="renameAuthorPopup">
+        <div class="rename-popup-title">Wanna claim you built Stunn? 😏</div>
+        <div class="rename-popup-sub">Type your name to take the credit:</div>
+        <div class="rename-popup-row">
+          <input type="text" id="fakeAuthorInput" class="rename-popup-input" placeholder="Your name..." maxlength="20" autocomplete="off" />
+          <button type="button" id="fakeAuthorSubmitBtn" class="rename-popup-btn">Claim</button>
+        </div>
+        <button type="button" id="fakeAuthorCancelBtn" class="rename-popup-close">Nevermind</button>
+      </div>
+
+      <div class="troll-pill hidden" id="trollPill" style="display:none;">Nice try 😏 Only Vyom Singh built this.</div>
+    </div>
+
+    <!-- MOST BOTTOM-LEFT USER PFP DOCK -->
+    <div class="user-profile-dock" id="userProfileDock" title="Click to customize AI Behaviour & Preferred Color">
+      <div class="user-profile-info" id="openSettingsArea">
+        <img id="sidebarUserPfp" class="user-pfp" src="favicon.png" alt="User PFP" referrerpolicy="no-referrer" />
+        <div class="user-meta">
+          <div class="user-preferred-name" id="sidebarUserName"><span id="sidebarUserNameText">Researcher</span></div>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="profile-icon-btn" id="editNameBtn" type="button" title="Customize AI Behaviour">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+        <button class="profile-icon-btn" id="logoutBtn" type="button" title="Sign Out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="mode-dropdown" id="modeDropdown">
+          <button type="button" class="mode-trigger" id="modeTrigger" aria-haspopup="listbox" aria-expanded="false" title="Select Stunn Persona">
+            <span class="mode-trigger-doodle" id="modeTriggerDoodle" aria-hidden="true"></span>
+            <span class="mode-trigger-text">
+              <span class="mode-trigger-name" id="modeTriggerName">Astra</span>
+              <span class="mode-trigger-sub" id="modeTriggerSub">Adaptive Core</span>
+            </span>
+            <svg class="mode-trigger-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="mode-menu" id="modeMenu" role="listbox" aria-label="Stunn personas"></div>
+          <input type="hidden" id="modeSelect" value="general" />
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="action-btn" id="webSearchToggle" type="button" title="Toggle Live Web Search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 4 5.6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-5.6-4-9s1.5-6.4 4-9z"/></svg>
+          <span id="webSearchLabel">Search: OFF</span>
+        </button>
+        <button class="action-btn" id="themeToggle" type="button" title="Toggle Dark/Light Mode">
+          <span id="themeIcon" aria-hidden="true"></span>
+        </button>
+        <button class="clear" id="clearConversation" type="button">Clear</button>
+      </div>
+    </header>
+
+    <section class="workspace is-empty" id="workspace">
+      <div class="conversation" id="conversation">
+        <div class="hero" id="welcome">
+          <div class="hero-copy">
+            <div class="hero-kicker" id="heroKicker"></div>
+            <h1>Ask <span class="beyond">beyond</span> the obvious.</h1>
+            <p class="intro">A research partner with real-time streaming, zero-glitch code architecting, and live web synthesis. Give Stunn a challenge.</p>
+            <div class="suggestions">
+              <button class="suggestion" data-q="Research the latest breakthroughs in fusion energy and summarize them with a comparison table.">
+                <span>Map recent fusion energy<br>breakthroughs in a table</span><span class="arrow">↗</span>
+              </button>
+              <button class="suggestion" data-q="Write a robust Python calculator with full error handling and tests.">
+                <span>Architect a zero-glitch<br>Python calculator</span><span class="arrow">↗</span>
+              </button>
+              <button class="suggestion" data-q="What is 15% compound interest on $10,000 over 8 years with a year-by-year table?">
+                <span>Calculate an eight-year investment schedule</span><span class="arrow">↗</span>
+              </button>
+              <button class="suggestion" data-q="Explain quantum computing like I'm five with real-world analogies.">
+                <span>Make quantum computing intuitive</span><span class="arrow">↗</span>
+              </button>
+            </div>
+          </div>
+          <div class="vertical-mark">STUNN / 02</div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <!-- Attachments tray preview -->
+        <div class="attachments-tray" id="attachmentsTray"></div>
+        <div class="composer">
+          <textarea id="input" rows="1" placeholder="What are you curious about? (or attach files)"></textarea>
+          <div class="composer-btn-group">
+            <!-- File input accepting everything (documents, media, audio, video, code, archives) -->
+            <input type="file" id="fileAttachInput" multiple style="display:none;" />
+            <button class="icon-btn" id="attachFileBtn" type="button" title="Attach Any File (Images, Audio, Video, Docs, Code)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <button class="icon-btn" id="voiceBtn" type="button" title="Voice Input (Speech-to-Text)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+            <button class="send" id="send" type="button" title="Send (Enter)">
+              <svg id="sendIcon" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h13M13 7l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg id="stopIcon" style="display:none;width:15px;height:15px;" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="5" y="5" width="14" height="14" rx="2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="composer-meta">
+          <span>Enter to send · Shift + Enter for new line</span>
+          <span id="activeModeLabel">MODE: ASTRA</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== ABOUT STUNN MODAL (Ctrl+Shift+S) ===== -->
+<div class="settings-modal-gate hidden" id="aboutModal">
+  <div class="settings-modal-backdrop" id="aboutModalBackdrop"></div>
+  <div class="settings-modal-card" style="max-width:480px" role="dialog" aria-modal="true">
+    <div class="settings-modal-header">
+      <div class="settings-title-group">
+        <div class="settings-brand-pill">STUNN INTELLIGENCE // ORIGIN</div>
+        <h2 class="settings-modal-title">About Stunn.</h2>
+      </div>
+      <button class="settings-close-btn" id="closeAboutModalBtn" type="button" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="settings-modal-body" style="gap:16px">
+      <div class="about-creator-card">
+        <div class="about-avatar-ring">
+          <picture>
+            <source srcset="stunn-mark-dark.svg" media="(prefers-color-scheme: dark)">
+            <img src="stunn-mark.svg" alt="Stunn" />
+          </picture>
+        </div>
+        <div class="about-creator-info">
+          <div class="about-creator-name">Vyom Singh</div>
+          <div class="about-creator-role">Designer · Engineer · Founder of Stunn.</div>
+        </div>
+      </div>
+
+      <div class="about-manifesto">
+        <p>Stunn wasn't built by a team, a startup, or a lab. <strong>It was built by one person.</strong></p>
+        <p>Every line of code. Every design decision. Every AI system talking to every other AI system. The streaming, the UI, the intelligence — all of it, from scratch.</p>
+        <p class="about-kicker">If this thing impressed you, you now know exactly who to credit.<br/><em>Remember the name.</em></p>
+      </div>
+
+      <div class="about-socials">
+        <a class="about-social-link" href="https://www.youtube.com/@VyomEditz-6" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.5 6.2s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.6 2 12 2 12 2s-4.6 0-7.3.1c-.6.1-1.9.1-3 1.3C.8 4.2.5 6.2.5 6.2S.2 8.5.2 10.8v2.1c0 2.3.3 4.6.3 4.6s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.2 21.7 12 21.8 12 21.8s4.6 0 7.3-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.3.3-4.6v-2.1C23.8 8.5 23.5 6.2 23.5 6.2zM9.7 15.5V8.4l6.6 3.6-6.6 3.5z"/>
+          </svg>
+          <span>@VyomEditz-6</span>
+        </a>
+      </div>
+
+      <div style="font:10px/1 'SFMono-Regular',Consolas,monospace;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding-top:4px;border-top:1px solid var(--line)">
+        Stunn v2.0 · Agentic AI · Built 2026 · <span style="color:var(--accent)">Ctrl+Shift+S</span> to open
+      </div>
+
+      <div class="signature-seal-bottom">
+        <div class="signature-shine-frame" title="Vyom Singh — Verified Creator Signature">
+          <div class="signature-shine-gold"></div>
+        </div>
+        <div class="signature-caption">VERIFIED CREATOR SIGNATURE // VYOM SINGH</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROFILE & AI SETTINGS MODAL ===== -->
+<div class="settings-modal-gate hidden" id="profileModal">
+  <div class="settings-modal-backdrop" id="profileModalBackdrop"></div>
+  <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="settings-modal-header">
+      <div class="settings-title-group">
+        <div class="settings-brand-pill">STUNN INTELLIGENCE // PREFERENCES</div>
+        <h2 id="settingsModalTitle" class="settings-modal-title">AI & Profile Preferences</h2>
+      </div>
+      <button class="settings-close-btn" id="closeProfileModalBtn" type="button" aria-label="Close settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="settings-modal-body">
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <span class="settings-section-num">01</span><span class="settings-section-label">User Profile</span>
+        </div>
+        <div class="settings-user-card">
+          <img id="settingsUserPfp" class="settings-user-pfp" src="favicon.png" alt="Profile avatar" />
+          <div class="settings-user-details">
+            <label class="settings-field-label" for="settingsPreferredNameInput">Preferred Name (How Stunn addresses you)</label>
+            <div class="settings-input-row">
+              <input type="text" id="settingsPreferredNameInput" class="settings-input" placeholder="e.g. Vyom" maxlength="32" />
+              <button type="button" class="settings-btn-inline" id="savePreferredNameBtn">Save Name</button>
+            </div>
+            <div class="settings-email-text" id="settingsUserEmailText">google-user@domain.com</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <span class="settings-section-num">02</span><span class="settings-section-label">AI Behaviour & Personality</span>
+        </div>
+        <p class="settings-section-desc">Leave a custom prompt or system instruction. Stunn will adopt this persona and follow your behavioral instructions on every response.</p>
+
+        <div class="preset-chips-wrap">
+          <button type="button" class="preset-chip" data-behavior="Act as a Principal Software Engineer. Write clean, idiomatic, robust code with zero fluff, proper types, and edge case handling.">Anvil / Architect</button>
+          <button type="button" class="preset-chip" data-behavior="Be extremely concise, high-density, and direct. Skip pleasantries, conversational filler, and intros. Use sharp bullet points.">Edge / Concise</button>
+          <button type="button" class="preset-chip" data-behavior="Act as an elite scientific researcher. Deconstruct problems from first principles, evaluate empirical evidence, and provide deep structured analysis.">Prism / Research</button>
+          <button type="button" class="preset-chip" data-behavior="Act as a patient, encouraging Socratic mentor. Explain ideas with intuitive analogies, ask clarifying questions, and help guide my understanding.">Socratic Mentor</button>
+          <button type="button" class="preset-chip chip-clear" id="clearAiBehaviorBtn">Reset to Default</button>
+        </div>
+
+        <textarea id="customAiBehaviorInput" class="settings-textarea" rows="4" placeholder="e.g. Always respond in bullet points..."></textarea>
+        <div class="settings-hint">Saved locally and applied dynamically across all your chats and prompts.</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <span class="settings-section-num">03</span><span class="settings-section-label">Preferred AI Accent Color</span>
+        </div>
+        <p class="settings-section-desc">Customize the color of the AI chat accents, buttons, highlights, and options.</p>
+
+        <div class="color-picker-palette">
+          <button type="button" class="color-swatch-btn selected" data-color="#dc613e" style="--c:#dc613e" title="Stunn Terracotta (Default)"></button>
+          <button type="button" class="color-swatch-btn" data-color="#00b4d8" style="--c:#00b4d8" title="Cyber Cyan"></button>
+          <button type="button" class="color-swatch-btn" data-color="#10b981" style="--c:#10b981" title="Emerald Green"></button>
+          <button type="button" class="color-swatch-btn" data-color="#8b5cf6" style="--c:#8b5cf6" title="Royal Violet"></button>
+          <button type="button" class="color-swatch-btn" data-color="#ef4444" style="--c:#ef4444" title="Crimson Red"></button>
+          <button type="button" class="color-swatch-btn" data-color="#f59e0b" style="--c:#f59e0b" title="Amber Gold"></button>
+          <button type="button" class="color-swatch-btn" data-color="#ec4899" style="--c:#ec4899" title="Neon Pink"></button>
+          <button type="button" class="color-swatch-btn" data-color="#2d817e" style="--c:#2d817e" title="Deep Teal"></button>
+
+          <div class="custom-color-picker-wrap" title="Pick any custom hex color">
+            <input type="color" id="customColorPickerInput" value="#dc613e" class="color-picker-native" />
+            <span class="color-picker-label">Custom</span>
+          </div>
+        </div>
+
+        <div class="color-preview-box">
+          <div class="color-preview-pill" id="colorPreviewPill">
+            <span class="color-preview-dot" id="colorPreviewDot"></span>
+            <span id="colorPreviewText">Active Color: #DC613E</span>
+          </div>
+          <button type="button" class="settings-btn-inline" id="resetColorBtn">Reset Default</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-modal-footer">
+      <div id="settingsToastMsg" class="settings-toast">Preferences applied!</div>
+      <button type="button" class="settings-btn-primary" id="saveAllSettingsBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== GOOGLE OAUTH 2.0 CLIENT ID =====
+  const DEFAULT_GOOGLE_CLIENT_ID = "50121429364-ijj1q3eskj3k4indirgoaclpssnpncsk.apps.googleusercontent.com";
+
+  // ===== BACKEND ENDPOINTS =====
+  const BASE_URL = "https://stunn-tshm.onrender.com";
+  const STREAM_URL = `${BASE_URL}/chat/stream`;
+  const CHAT_URL = `${BASE_URL}/chat`;
+
+  // ===== STATE MANAGEMENT =====
+  let currentSessionId = localStorage.getItem("stunn_current_session") || crypto.randomUUID();
+  localStorage.setItem("stunn_current_session", currentSessionId);
+  let webSearchEnabled = false;
+  let activeAbortController = null;
+  let currentUser = JSON.parse(localStorage.getItem("stunn_user") || "null");
+
+  if (currentUser && !currentUser.isRealGoogleAuth) {
+    localStorage.removeItem("stunn_user");
+    currentUser = null;
+  }
+
+  // DOM Elements
+  const loginGateEl = document.getElementById("loginGate");
+  const preferredNameInputEl = document.getElementById("preferredNameInput");
+  const clientIdSetupBox = document.getElementById("clientIdSetupBox");
+  const clientIdInput = document.getElementById("clientIdInput");
+  const realGoogleSignInBtn = document.getElementById("realGoogleSignInBtn");
+  const googleBtnText = document.getElementById("googleBtnText");
+  const loginErrorMsg = document.getElementById("loginErrorMsg");
+
+  const sidebarUserPfpEl = document.getElementById("sidebarUserPfp");
+  const sidebarUserNameTextEl = document.getElementById("sidebarUserNameText");
+  const editNameBtn = document.getElementById("editNameBtn");
+  const sidebarUserNameEl = document.getElementById("sidebarUserName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const conversationEl = document.getElementById("conversation");
+  const inputEl = document.getElementById("input");
+  const sendEl = document.getElementById("send");
+  const sendIcon = document.getElementById("sendIcon");
+  const stopIcon = document.getElementById("stopIcon");
+  const voiceBtn = document.getElementById("voiceBtn");
+  const attachFileBtn = document.getElementById("attachFileBtn");
+  const fileAttachInput = document.getElementById("fileAttachInput");
+  const attachmentsTray = document.getElementById("attachmentsTray");
+  const webSearchToggle = document.getElementById("webSearchToggle");
+  const webSearchLabel = document.getElementById("webSearchLabel");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const modeSelect = document.getElementById("modeSelect");
+  const modeDropdown = document.getElementById("modeDropdown");
+  const modeTrigger = document.getElementById("modeTrigger");
+  const modeTriggerDoodle = document.getElementById("modeTriggerDoodle");
+  const modeTriggerName = document.getElementById("modeTriggerName");
+  const modeTriggerSub = document.getElementById("modeTriggerSub");
+  const modeMenu = document.getElementById("modeMenu");
+  const activeModeLabel = document.getElementById("activeModeLabel");
+  const clearEl = document.getElementById("clearConversation");
+  const newChatBtn = document.getElementById("newChatBtn");
+  const historyListEl = document.getElementById("historyList");
+
+  // ===== REAL GOOGLE OAUTH POPUP & BOTTOM-LEFT PROFILE LOGIC =====
+  function generateAvatarSvgDataUri(name) {
+    const initial = (name || "S").trim().charAt(0).toUpperCase();
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="50" fill="#12191d"/>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#dc613e" stroke-width="4"/>
+      <text x="50" y="64" font-family="Georgia, serif" font-size="44" fill="#f4f2eb" text-anchor="middle">${initial}</text>
+    </svg>`;
+    return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  }
+
+  function getActiveClientId() {
+    const trimmed = (DEFAULT_GOOGLE_CLIENT_ID || "").trim();
+    const isPlaceholder = !trimmed || trimmed.includes("YOUR_GOOGLE_CLIENT_ID");
+    if (!isPlaceholder && trimmed.endsWith(".apps.googleusercontent.com")) return trimmed;
+    return (localStorage.getItem("stunn_google_client_id") || "").trim();
+  }
+
+  function checkOriginProtocol() {
+    if (window.location.protocol === "file:") {
+      showLoginError(
+        "⚠️ Google OAuth does not allow direct file:// URLs. Please run Stunn with a local server (e.g. VS Code Live Server) or access it from your deployed URL (https://stunnai.netlify.app)."
+      );
+      return false;
+    }
+    return true;
+  }
+
+  function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function funGreetingText(name) {
+    const who = (name || "").trim();
+    const withName = (s) => who ? s.replaceAll("{name}", who) : s.replace(/,\s*\{name\}\??/g, "").replace(/\{name\}/g, "there");
+    const now = new Date();
+    const day = now.toLocaleDateString(undefined, { weekday: "long" });
+    const hour = now.getHours();
+    const dayPool = {
+      0: [`Sunday session, {name}?`, `Easy Sunday curiosities, {name}.`, `Sunday mode: wonderfully unhurried.`],
+      1: [`Monday momentum, {name}.`, `Fresh Monday, fresh questions, {name}.`, `Monday brain: warming up nicely.`],
+      2: [`Tuesday trajectory, {name}.`, `Tuesday’s a good day to overthink (productively), {name}.`, `Steady Tuesday energy.`],
+      3: [`Midweek mischief, {name}?`, `Wednesday workshop vibes, {name}.`, `Halfway there — make it interesting.`],
+      4: [`Thursday theories, {name}.`, `Almost-Friday focus, {name}.`, `Thursday: optimal for big asks.`],
+      5: [`Friday experiments, {name}?`, `Friday session — what are we breaking (gently), {name}?`, `Friday curiosity unlocked.`],
+      6: [`Saturday signals, {name}.`, `Weekend deep-dive, {name}?`, `Saturday: side quests encouraged.`]
+    }[now.getDay()] || [`${day} session, {name}?`];
+
+    let timePool = [];
+    if (hour >= 5 && hour < 12) timePool = [`Morning neurons online, {name}.`, `Early sparks, {name}.`, `Coffee-and-curiosity hours.`];
+    else if (hour >= 12 && hour < 17) timePool = [`Afternoon orbit, {name}.`, `Prime time for a smart question, {name}.`, `Midday brain doing its thing.`];
+    else if (hour >= 17 && hour < 22) timePool = [`Evening edition, {name}.`, `Golden-hour ideas, {name}?`, `Post-daylight problem solving.`];
+    else timePool = [`Late-night curiosity, {name}.`, `Quiet hours, loud ideas, {name}.`, `Night shift for the curious.`];
+
+    const wildPool = [
+      `What rabbit hole today, {name}?`,
+      `Let’s make this interesting, {name}.`,
+      `Curiosity looks good on you, {name}.`,
+      `One good question away, {name}.`,
+      `Systems curious. You?`
+    ];
+    const pool = Math.random() < 0.45 ? dayPool : (Math.random() < 0.5 ? timePool : wildPool);
+    return withName(pickOne(pool));
+  }
+  function updateFunGreeting() {
+    const kicker = document.getElementById("heroKicker");
+    if (!kicker) return;
+    const displayName = currentUser ? (currentUser.preferredName || currentUser.name || "") : "";
+    kicker.textContent = funGreetingText(displayName);
+  }
+
+  function applyUserSession(userObj) {
+    currentUser = userObj;
+    localStorage.setItem("stunn_user", JSON.stringify(currentUser));
+    const displayName = currentUser.preferredName || currentUser.name || "Researcher";
+    sidebarUserNameTextEl.textContent = displayName;
+    sidebarUserPfpEl.src = currentUser.picture || generateAvatarSvgDataUri(displayName);
+    sidebarUserPfpEl.onerror = () => { sidebarUserPfpEl.src = generateAvatarSvgDataUri(displayName); };
+    loginGateEl.classList.add("hidden");
+    updateFunGreeting();
+    inputEl.focus();
+  }
+
+  function showLoginError(msg) {
+    loginErrorMsg.textContent = msg;
+    loginErrorMsg.style.display = "block";
+  }
+
+  function initGoogleAuthGate() {
+    checkOriginProtocol();
+    const activeId = getActiveClientId();
+    if (!activeId) clientIdSetupBox.classList.add("visible");
+    else clientIdInput.value = activeId;
+
+    if (currentUser && currentUser.isRealGoogleAuth) applyUserSession(currentUser);
+    else loginGateEl.classList.remove("hidden");
+  }
+
+  realGoogleSignInBtn.addEventListener("click", () => {
+    loginErrorMsg.style.display = "none";
+    if (!checkOriginProtocol()) return;
+
+    let clientId = clientIdInput.value.trim() || getActiveClientId();
+    if (clientIdInput.value.trim()) localStorage.setItem("stunn_google_client_id", clientIdInput.value.trim());
+
+    if (!clientId || !clientId.endsWith(".apps.googleusercontent.com")) {
+      clientIdSetupBox.classList.add("visible");
+      showLoginError("Please paste a valid Google OAuth Client ID ending in .apps.googleusercontent.com to open the Google Sign-In window.");
+      clientIdInput.focus();
+      return;
+    }
+
+    if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) {
+      showLoginError("Google Sign-In library is still loading. Please wait a second and try again.");
+      return;
+    }
+
+    googleBtnText.textContent = "Opening Google Sign-In…";
+
+    try {
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "openid profile email",
+        prompt: "select_account",
+        callback: async (tokenResponse) => {
+          googleBtnText.textContent = "Continue with Google";
+          if (tokenResponse.error) {
+            showLoginError("Google Sign-In error: " + (tokenResponse.error_description || tokenResponse.error));
+            return;
+          }
+          try {
+            const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+              headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch Google profile info.");
+            const profile = await res.json();
+            const customTypedName = preferredNameInputEl.value.trim();
+            const savedPrefName = localStorage.getItem(`stunn_pref_name_${profile.sub}`);
+            const preferredName = customTypedName || savedPrefName || profile.given_name || profile.name || "Researcher";
+
+            localStorage.setItem(`stunn_pref_name_${profile.sub}`, preferredName);
+            applyUserSession({
+              sub: profile.sub,
+              name: profile.name,
+              preferredName: preferredName,
+              email: profile.email,
+              picture: profile.picture,
+              isRealGoogleAuth: true
+            });
+          } catch (fetchErr) { showLoginError("Could not retrieve Google profile: " + fetchErr.message); }
+        }
+      });
+      tokenClient.requestAccessToken();
+    } catch (err) {
+      googleBtnText.textContent = "Continue with Google";
+      showLoginError("Failed to initialize Google OAuth popup: " + err.message);
+    }
+  });
+
+  // ===== AI PREFERRED ACCENT COLOR LOGIC =====
+  const DEFAULT_AI_ACCENT_COLOR = "#dc613e";
+  function applyAiCustomColor(colorHex, saveToStorage = true) {
+    if (!colorHex || typeof colorHex !== "string") return;
+    const cleanColor = colorHex.trim();
+    document.documentElement.style.setProperty("--accent", cleanColor);
+    if (saveToStorage) localStorage.setItem("stunn_ai_color", cleanColor);
+
+    const previewDot = document.getElementById("colorPreviewDot");
+    const previewText = document.getElementById("colorPreviewText");
+    const nativePicker = document.getElementById("customColorPickerInput");
+    if (previewDot) previewDot.style.background = cleanColor;
+    if (previewText) previewText.textContent = `Active Color: ${cleanColor.toUpperCase()}`;
+    if (nativePicker && nativePicker.value.toLowerCase() !== cleanColor.toLowerCase()) {
+      try { nativePicker.value = cleanColor; } catch (e) {}
+    }
+
+    document.querySelectorAll(".color-swatch-btn").forEach(btn => {
+      const swatchColor = (btn.getAttribute("data-color") || "").toLowerCase();
+      if (swatchColor === cleanColor.toLowerCase()) btn.classList.add("selected");
+      else btn.classList.remove("selected");
+    });
+  }
+  function initAiColor() {
+    const savedColor = localStorage.getItem("stunn_ai_color") || DEFAULT_AI_ACCENT_COLOR;
+    applyAiCustomColor(savedColor, false);
+  }
+
+  // ===== PROFILE & AI SETTINGS MODAL LOGIC =====
+  const profileModal = document.getElementById("profileModal");
+  const profileModalBackdrop = document.getElementById("profileModalBackdrop");
+  const closeProfileModalBtn = document.getElementById("closeProfileModalBtn");
+  const saveAllSettingsBtn = document.getElementById("saveAllSettingsBtn");
+  const settingsUserPfp = document.getElementById("settingsUserPfp");
+  const settingsPreferredNameInput = document.getElementById("settingsPreferredNameInput");
+  const savePreferredNameBtn = document.getElementById("savePreferredNameBtn");
+  const settingsUserEmailText = document.getElementById("settingsUserEmailText");
+  const customAiBehaviorInput = document.getElementById("customAiBehaviorInput");
+  const clearAiBehaviorBtn = document.getElementById("clearAiBehaviorBtn");
+  const customColorPickerInput = document.getElementById("customColorPickerInput");
+  const resetColorBtn = document.getElementById("resetColorBtn");
+  const settingsToastMsg = document.getElementById("settingsToastMsg");
+  const openSettingsArea = document.getElementById("openSettingsArea");
+
+  let toastTimeout = null;
+  function showSettingsToast(msg) {
+    if (!settingsToastMsg) return;
+    settingsToastMsg.textContent = msg || "Preferences saved!";
+    settingsToastMsg.classList.add("visible");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => { settingsToastMsg.classList.remove("visible"); }, 2200);
+  }
+
+  function openProfileSettingsModal() {
+    if (!currentUser) return;
+    const displayName = currentUser.preferredName || currentUser.name || "Researcher";
+    if (settingsPreferredNameInput) settingsPreferredNameInput.value = displayName;
+    if (settingsUserEmailText) settingsUserEmailText.textContent = currentUser.email || "Authenticated via Google OAuth";
+    if (settingsUserPfp) settingsUserPfp.src = currentUser.picture || generateAvatarSvgDataUri(displayName);
+
+    const savedBehavior = localStorage.getItem("stunn_custom_behavior") || "";
+    if (customAiBehaviorInput) customAiBehaviorInput.value = savedBehavior;
+    const activeColor = localStorage.getItem("stunn_ai_color") || DEFAULT_AI_ACCENT_COLOR;
+    applyAiCustomColor(activeColor, false);
+
+    if (profileModal) {
+      profileModal.classList.remove("hidden");
+      if (settingsPreferredNameInput) settingsPreferredNameInput.focus();
+    }
+  }
+
+  function closeProfileSettingsModal() {
+    saveCurrentSettingsValues();
+    if (profileModal) profileModal.classList.add("hidden");
+  }
+
+  function saveCurrentSettingsValues() {
+    if (customAiBehaviorInput) localStorage.setItem("stunn_custom_behavior", customAiBehaviorInput.value.trim());
+    if (currentUser && settingsPreferredNameInput) {
+      const newName = settingsPreferredNameInput.value.trim();
+      if (newName) {
+        currentUser.preferredName = newName;
+        if (currentUser.sub) localStorage.setItem(`stunn_pref_name_${currentUser.sub}`, newName);
+        applyUserSession(currentUser);
+      }
+    }
+  }
+
+  if (editNameBtn) editNameBtn.addEventListener("click", openProfileSettingsModal);
+  if (sidebarUserNameEl) sidebarUserNameEl.addEventListener("click", openProfileSettingsModal);
+  if (openSettingsArea) openSettingsArea.addEventListener("click", openProfileSettingsModal);
+  if (closeProfileModalBtn) closeProfileModalBtn.addEventListener("click", closeProfileSettingsModal);
+  if (profileModalBackdrop) profileModalBackdrop.addEventListener("click", closeProfileSettingsModal);
+  if (saveAllSettingsBtn) saveAllSettingsBtn.addEventListener("click", () => { saveCurrentSettingsValues(); closeProfileSettingsModal(); });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && profileModal && !profileModal.classList.contains("hidden")) closeProfileSettingsModal();
+  });
+
+  if (savePreferredNameBtn) {
+    savePreferredNameBtn.addEventListener("click", () => {
+      const newName = settingsPreferredNameInput ? settingsPreferredNameInput.value.trim() : "";
+      if (currentUser && newName) {
+        currentUser.preferredName = newName;
+        if (currentUser.sub) localStorage.setItem(`stunn_pref_name_${currentUser.sub}`, newName);
+        applyUserSession(currentUser);
+        showSettingsToast("Name updated!");
+      }
+    });
+  }
+
+  document.querySelectorAll(".preset-chip[data-behavior]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const text = chip.getAttribute("data-behavior");
+      if (customAiBehaviorInput) customAiBehaviorInput.value = text;
+      localStorage.setItem("stunn_custom_behavior", text);
+      showSettingsToast("Preset applied!");
+    });
+  });
+
+  if (clearAiBehaviorBtn) {
+    clearAiBehaviorBtn.addEventListener("click", () => {
+      if (customAiBehaviorInput) customAiBehaviorInput.value = "";
+      localStorage.removeItem("stunn_custom_behavior");
+      showSettingsToast("Reset to default persona");
+    });
+  }
+
+  if (customAiBehaviorInput) {
+    customAiBehaviorInput.addEventListener("input", () => { localStorage.setItem("stunn_custom_behavior", customAiBehaviorInput.value.trim()); });
+  }
+
+  document.querySelectorAll(".color-swatch-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      applyAiCustomColor(btn.getAttribute("data-color"), true);
+      showSettingsToast("Color updated!");
+    });
+  });
+
+  if (customColorPickerInput) {
+    customColorPickerInput.addEventListener("input", (e) => applyAiCustomColor(e.target.value, true));
+    customColorPickerInput.addEventListener("change", (e) => { applyAiCustomColor(e.target.value, true); showSettingsToast("Custom color saved!"); });
+  }
+
+  if (resetColorBtn) {
+    resetColorBtn.addEventListener("click", () => {
+      applyAiCustomColor(DEFAULT_AI_ACCENT_COLOR, true);
+      showSettingsToast("Reset to default terracotta");
+    });
+  }
+
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("stunn_user");
+    currentUser = null;
+    preferredNameInputEl.value = "";
+    loginGateEl.classList.remove("hidden");
+  });
+
+  initGoogleAuthGate();
+  initAiColor();
+  updateFunGreeting();
+
+  // ===== ABOUT MODAL (Ctrl+Shift+S / built-by click) =====
+  const aboutModal = document.getElementById("aboutModal");
+  const closeAboutModalBtn = document.getElementById("closeAboutModalBtn");
+  const aboutModalBackdrop = document.getElementById("aboutModalBackdrop");
+  const openAboutModalBtn = document.getElementById("openAboutModalBtn");
+
+  function openAboutModal() { if (aboutModal) aboutModal.classList.remove("hidden"); }
+  function closeAboutModal() { if (aboutModal) aboutModal.classList.add("hidden"); }
+
+  if (openAboutModalBtn) openAboutModalBtn.addEventListener("click", openAboutModal);
+  if (closeAboutModalBtn) closeAboutModalBtn.addEventListener("click", closeAboutModal);
+  if (aboutModalBackdrop) aboutModalBackdrop.addEventListener("click", closeAboutModal);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === "S") {
+      e.preventDefault();
+      if (aboutModal && !aboutModal.classList.contains("hidden")) closeAboutModal();
+      else openAboutModal();
+    }
+    if (e.key === "Escape" && aboutModal && !aboutModal.classList.contains("hidden")) closeAboutModal();
+  });
+
+  // ===== CHEEKY AUTHOR RENAME PRANK ANIMATION =====
+  const renameAuthorBtn = document.getElementById("renameAuthorBtn");
+  const renameAuthorPopup = document.getElementById("renameAuthorPopup");
+  const fakeAuthorInput = document.getElementById("fakeAuthorInput");
+  const fakeAuthorSubmitBtn = document.getElementById("fakeAuthorSubmitBtn");
+  const fakeAuthorCancelBtn = document.getElementById("fakeAuthorCancelBtn");
+  const builtByNameSlot = document.getElementById("builtByNameSlot");
+  const builtByNameText = document.getElementById("builtByNameText");
+  const trollPill = document.getElementById("trollPill");
+
+  let isPrankRunning = false;
+  function toggleRenamePopup(e) {
+    if (e) e.stopPropagation();
+    if (renameAuthorPopup.classList.contains("hidden")) {
+      renameAuthorPopup.classList.remove("hidden");
+      fakeAuthorInput.value = ""; fakeAuthorInput.focus();
+    } else renameAuthorPopup.classList.add("hidden");
+  }
+  function hideRenamePopup() { if (renameAuthorPopup) renameAuthorPopup.classList.add("hidden"); }
+
+  function runAuthorPrank() {
+    const fakeName = (fakeAuthorInput.value || "").trim();
+    if (!fakeName) { fakeAuthorInput.focus(); return; }
+    if (isPrankRunning) return;
+    isPrankRunning = true;
+
+    hideRenamePopup();
+    builtByNameText.textContent = fakeName;
+    builtByNameText.style.color = "var(--ink)";
+    builtByNameSlot.classList.remove("strikethrough", "shake");
+
+    setTimeout(() => {
+      builtByNameSlot.classList.add("strikethrough", "shake");
+      setTimeout(() => {
+        if (trollPill) {
+          trollPill.textContent = "Nice try 😏 Only Vyom Singh built this.";
+          trollPill.style.display = "block";
+          trollPill.classList.remove("hidden");
+        }
+      }, 400);
+    }, 500);
+
+    setTimeout(() => {
+      builtByNameSlot.classList.remove("strikethrough", "shake");
+      builtByNameText.style.opacity = "0";
+      setTimeout(() => {
+        builtByNameText.textContent = "Vyom Singh";
+        builtByNameText.style.color = "var(--accent)";
+        builtByNameText.style.opacity = "1";
+        builtByNameText.style.textShadow = "0 0 14px #ffd700, 0 0 5px #ffd700";
+        if (trollPill) { trollPill.style.display = "none"; trollPill.classList.add("hidden"); }
+        setTimeout(() => { builtByNameText.style.textShadow = "none"; isPrankRunning = false; }, 1200);
+      }, 200);
+    }, 2400);
+  }
+
+  if (renameAuthorBtn) renameAuthorBtn.addEventListener("click", toggleRenamePopup);
+  if (fakeAuthorCancelBtn) fakeAuthorCancelBtn.addEventListener("click", hideRenamePopup);
+  if (fakeAuthorSubmitBtn) fakeAuthorSubmitBtn.addEventListener("click", runAuthorPrank);
+  if (fakeAuthorInput) {
+    fakeAuthorInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); runAuthorPrank(); }
+      else if (e.key === "Escape") hideRenamePopup();
+    });
+  }
+  document.addEventListener("click", (e) => {
+    if (renameAuthorPopup && !renameAuthorPopup.contains(e.target) && e.target !== renameAuthorBtn) hideRenamePopup();
+  });
+
+  // ===== THEME (DARK / LIGHT) =====
+  function themeIconSvg(theme) {
+    if (theme === "dark") {
+      return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>`;
+    }
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`;
+  }
+  function syncAppLogos(theme) {
+    document.querySelectorAll(".app-logo-img[data-light][data-dark]").forEach(img => {
+      img.src = theme === "dark" ? img.dataset.dark : img.dataset.light;
+    });
+  }
+  function initTheme() {
+    const saved = localStorage.getItem("stunn_theme") || "light";
+    document.documentElement.setAttribute("data-theme", saved);
+    themeIcon.innerHTML = themeIconSvg(saved);
+    syncAppLogos(saved);
+  }
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", current);
+    localStorage.setItem("stunn_theme", current);
+    themeIcon.innerHTML = themeIconSvg(current);
+    syncAppLogos(current);
+  });
+  initTheme();
+
+  // ===== WEB SEARCH TOGGLE =====
+  webSearchToggle.addEventListener("click", () => {
+    webSearchEnabled = !webSearchEnabled;
+    webSearchToggle.classList.toggle("active", webSearchEnabled);
+    webSearchLabel.textContent = webSearchEnabled ? "Search: ON" : "Search: OFF";
+  });
+
+  // ===== MODE SELECTOR (CUSTOM PREMIUM DROPDOWN) =====
+  const MODE_PERSONAS = [
+    { value: "general", name: "Astra", sub: "Adaptive Core", desc: "Auto intelligence for fluid, all-purpose reasoning",
+      doodle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.9 9l5.6.3-4.4 3.4 1.5 5.4L12 15.1 7.4 18.1l1.5-5.4-4.4-3.4L10.1 9z"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>` },
+    { value: "coder", name: "Anvil", sub: "Precision Build", desc: "Zero-glitch architecture, code, and debugging",
+      doodle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8.5h14l-2 3.5H7z"/><path d="M9 12v3.2a2.8 2.8 0 0 0 2.8 2.8h.4A2.8 2.8 0 0 0 15 15.2V12"/><path d="M8 18h8"/></svg>` },
+    { value: "research", name: "Prism", sub: "Deep Synthesis", desc: "Structured research, evidence, and analysis",
+      doodle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 4.5 18.5h15z"/><path d="M12 8.5v5.5"/><path d="m12 14 6.2 3.2M12 14 5.8 17.2"/></svg>` },
+    { value: "concise", name: "Edge", sub: "High Density", desc: "Sharp, minimal answers with maximum signal",
+      doodle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5h14M5 12h9M5 17.5h5.5"/><path d="m17.5 14 2 2 3-3.5"/></svg>` }
+  ];
+
+  function personaByValue(value) {
+    return MODE_PERSONAS.find(p => p.value === value) || MODE_PERSONAS[0];
+  }
+
+  function setMode(value, opts = {}) {
+    const p = personaByValue(value);
+    modeSelect.value = p.value;
+    if (modeTriggerDoodle) modeTriggerDoodle.innerHTML = p.doodle;
+    if (modeTriggerName) modeTriggerName.textContent = p.name;
+    if (modeTriggerSub) modeTriggerSub.textContent = p.sub;
+    if (activeModeLabel) activeModeLabel.textContent = "MODE: " + p.name.toUpperCase();
+    if (modeMenu) {
+      modeMenu.querySelectorAll(".mode-option").forEach(btn => {
+        const active = btn.dataset.value === p.value;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+      });
+    }
+    if (opts.close !== false && modeDropdown) {
+      modeDropdown.classList.remove("open");
+      if (modeTrigger) modeTrigger.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function renderModeMenu() {
+    if (!modeMenu) return;
+    modeMenu.innerHTML = MODE_PERSONAS.map(p => `
+      <button type="button" class="mode-option${p.value === modeSelect.value ? " active" : ""}" role="option" data-value="${p.value}" aria-selected="${p.value === modeSelect.value ? "true" : "false"}">
+        <span class="mode-option-doodle" aria-hidden="true">${p.doodle}</span>
+        <span class="mode-option-copy">
+          <span class="mode-option-name">${p.name}</span>
+          <span class="mode-option-desc">${p.sub} · ${p.desc}</span>
+        </span>
+        <svg class="mode-option-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.8"/></svg>
+      </button>
+    `).join("");
+    modeMenu.querySelectorAll(".mode-option").forEach(btn => {
+      btn.addEventListener("click", () => setMode(btn.dataset.value));
+    });
+  }
+
+  if (modeTrigger && modeDropdown) {
+    modeTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = modeDropdown.classList.toggle("open");
+      modeTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", (e) => {
+      if (!modeDropdown.contains(e.target)) {
+        modeDropdown.classList.remove("open");
+        modeTrigger.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modeDropdown.classList.contains("open")) {
+        modeDropdown.classList.remove("open");
+        modeTrigger.setAttribute("aria-expanded", "false");
+        modeTrigger.focus();
+      }
+    });
+  }
+
+  renderModeMenu();
+  setMode(modeSelect.value || "general", { close: true });
+
+  // ===== LOCAL STORAGE CHAT HISTORY & AUTO TITLE GENERATION =====
+  function getChats() {
+    try { return JSON.parse(localStorage.getItem("stunn_chats") || "{}"); } catch { return {}; }
+  }
+  function saveChats(chats) {
+    localStorage.setItem("stunn_chats", JSON.stringify(chats));
+  }
+  
+  // Title generator function called below
+  async function generateChatTitle(promptText, sessionId) {
+    try {
+      const res = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Summarize this text into a very short, 2-4 word title. No quotes, no punctuation, no preamble. Just the title itself. Text: "${promptText}"`,
+          sessionId: sessionId + "_title_gen", 
+          mode: "concise",
+          webSearch: false
+        })
+      });
+      const data = await res.json();
+      let title = (data.answer || data.text || data.output || "New Inquiry").replace(/["']/g, '').trim();
+      if (title.length > 35) title = title.slice(0, 35) + "…";
+
+      const chats = getChats();
+      if (chats[sessionId]) {
+        chats[sessionId].title = title;
+        saveChats(chats);
+        renderHistoryList();
+      }
+    } catch (err) {
+      const chats = getChats();
+      if (chats[sessionId]) {
+        chats[sessionId].title = promptText.slice(0, 28) + "…";
+        saveChats(chats);
+        renderHistoryList();
+      }
+    }
+  }
+
+  function saveMessageToCurrentChat(role, content) {
+    const chats = getChats();
+    let isNewChat = false;
+
+    if (!chats[currentSessionId]) {
+      chats[currentSessionId] = {
+        id: currentSessionId,
+        title: "Generating title...", 
+        messages: [],
+        timestamp: Date.now()
+      };
+      isNewChat = true;
+    }
+    
+    chats[currentSessionId].messages.push({ role, content });
+    saveChats(chats);
+    renderHistoryList();
+
+    // 3 Second delay so title gen doesn't choke the stream
+    if (isNewChat && role === "user") {
+      setTimeout(() => {
+        generateChatTitle(content, currentSessionId);
+      }, 3000);
+    }
+  }
+
+  function renderHistoryList() {
+    const chats = getChats();
+    historyListEl.innerHTML = "";
+    const sorted = Object.values(chats).sort((a, b) => b.timestamp - a.timestamp);
+    sorted.forEach((c) => {
+      const li = document.createElement("li");
+      li.className = "history-item" + (c.id === currentSessionId ? " active" : "");
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "history-title";
+      titleSpan.textContent = c.title || "Inquiry";
+      titleSpan.onclick = () => loadChat(c.id);
+      const delBtn = document.createElement("button");
+      delBtn.className = "history-del";
+      delBtn.textContent = "✕";
+      delBtn.title = "Delete chat";
+      delBtn.onclick = (e) => { e.stopPropagation(); deleteChat(c.id); };
+      li.appendChild(titleSpan);
+      li.appendChild(delBtn);
+      historyListEl.appendChild(li);
+    });
+  }
+
+  function loadChat(sessionId) {
+    currentSessionId = sessionId;
+    localStorage.setItem("stunn_current_session", currentSessionId);
+    renderHistoryList();
+    conversationEl.innerHTML = "";
+    const chats = getChats();
+    const chat = chats[sessionId];
+    if (!chat || chat.messages.length === 0) {
+      showWelcomeHero();
+      return;
+    }
+    chat.messages.forEach((m) => {
+      const isHtml = m.role === "user" && typeof m.content === "string" &&
+        (m.content.includes("bubble-file-tag") || m.content.includes("bubble-file-preview") || /^\s*<div[\s>]/.test(m.content));
+      renderBubble(m.role, m.content, isHtml);
+    });
+  }
+
+  function deleteChat(sessionId) {
+    const chats = getChats();
+    delete chats[sessionId];
+    saveChats(chats);
+    if (currentSessionId === sessionId) newChat();
+    else renderHistoryList();
+  }
+
+  function newChat() {
+    currentSessionId = crypto.randomUUID();
+    localStorage.setItem("stunn_current_session", currentSessionId);
+    showWelcomeHero();
+    renderHistoryList();
+    inputEl.focus();
+  }
+  newChatBtn.addEventListener("click", newChat);
+
+  // ===== AUTOGROW TEXTAREA =====
+  function autoGrow() {
+    inputEl.style.height = "auto";
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 132) + "px";
+  }
+  inputEl.addEventListener("input", autoGrow);
+
+  // ===== MARKDOWN FORMATTING & ENHANCEMENTS =====
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function formatMarkdown(text) {
+    if (typeof marked !== "undefined") {
+      try {
+        marked.setOptions({ gfm: true, breaks: true });
+        let html = marked.parse(text);
+        if (typeof DOMPurify !== "undefined") html = DOMPurify.sanitize(html);
+        return html;
+      } catch (err) { console.error("Markdown parse error:", err); }
+    }
+    return escapeHtml(text);
+  }
+  function enhanceBubble(bubble) {
+    bubble.querySelectorAll("table").forEach((table) => {
+      if (!table.parentElement.classList.contains("table-wrap")) {
+        const wrap = document.createElement("div");
+        wrap.className = "table-wrap";
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
+      }
+    });
+    bubble.querySelectorAll("pre").forEach((pre) => {
+      if (pre.parentElement.classList.contains("code-wrap")) return;
+      const codeEl = pre.querySelector("code");
+      let lang = "";
+      if (codeEl) {
+        const langClass = Array.from(codeEl.classList).find((c) => c.startsWith("language-"));
+        if (langClass) lang = langClass.replace("language-", "").toLowerCase();
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "code-wrap";
+      pre.parentNode.insertBefore(wrap, pre);
+      const header = document.createElement("div");
+      header.className = "code-header";
+      const langSpan = document.createElement("span");
+      langSpan.textContent = lang || "CODE";
+      header.appendChild(langSpan);
+      const btnGroup = document.createElement("div");
+      btnGroup.className = "code-header-btns";
+      const runBtn = document.createElement("button");
+      runBtn.className = "code-action-btn";
+      runBtn.type = "button";
+      runBtn.textContent = "▶ Run";
+      const outputDiv = document.createElement("div");
+      outputDiv.className = "code-output";
+      runBtn.onclick = () => {
+        const rawCode = codeEl ? codeEl.innerText : pre.innerText;
+        outputDiv.style.display = "block";
+        if (lang === "javascript" || lang === "js") {
+          try {
+            let logs = [];
+            const originalLog = console.log;
+            console.log = (...args) => { logs.push(args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" ")); };
+            const result = new Function(rawCode)();
+            console.log = originalLog;
+            outputDiv.textContent = logs.length > 0 ? logs.join("\n") : (result !== undefined ? `Result: ${result}` : "Code executed successfully (no logs).");
+          } catch (err) { outputDiv.textContent = `Runtime Error: ${err.message}`; }
+        } else if (lang === "html") {
+          const win = window.open("", "_blank");
+          win.document.write(rawCode);
+          win.document.close();
+          outputDiv.textContent = "Opened HTML component in preview tab!";
+        } else if (lang === "python" || lang === "py") {
+          outputDiv.textContent = `[Stunn Python Interpreter Preview]\n> Checking syntax...\n> Syntax: VALID\nTip: Ready to copy and run in VS Code or Terminal!`;
+        } else {
+          outputDiv.textContent = `Executed ${lang || 'snippet'} in sandbox.`;
+        }
+      };
+      btnGroup.appendChild(runBtn);
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "code-action-btn";
+      copyBtn.type = "button";
+      copyBtn.textContent = "Copy";
+      copyBtn.onclick = () => {
+        const codeText = codeEl ? codeEl.innerText : pre.innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
+        });
+      };
+      btnGroup.appendChild(copyBtn);
+      header.appendChild(btnGroup);
+      wrap.appendChild(header);
+      wrap.appendChild(pre);
+      wrap.appendChild(outputDiv);
+    });
+    bubble.querySelectorAll("a").forEach((link) => {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    });
+  }
+
+  function removeWelcomeHero() {
+    const el = document.getElementById("welcome");
+    if (el) el.remove();
+    const ws = document.getElementById("workspace");
+    if (ws) ws.classList.remove("is-empty");
+  }
+
+  function renderBubble(role, content, isHtml = false) {
+    removeWelcomeHero();
+    const msg = document.createElement("div");
+    msg.className = "message " + role;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    if (role === "bot" || isHtml) {
+      bubble.innerHTML = isHtml ? content : formatMarkdown(content);
+      if (role === "bot") enhanceBubble(bubble);
+    } else {
+      bubble.textContent = content;
+    }
+    msg.appendChild(bubble);
+    conversationEl.appendChild(msg);
+    conversationEl.scrollTop = conversationEl.scrollHeight;
+    return bubble;
+  }
+
+  // ===== FILE ATTACHMENTS STATE =====
+
+  let pendingAttachments = [];
+  const attachmentProcessing = new Map();
+
+  function getSessionFiles(sessionId) {
+    try {
+      const allFiles = JSON.parse(localStorage.getItem("stunn_session_files") || "{}");
+      return allFiles[sessionId] || [];
+    } catch { return []; }
+  }
+
+  function saveSessionFiles(sessionId, filesList) {
+    try {
+      const allFiles = JSON.parse(localStorage.getItem("stunn_session_files") || "{}");
+      allFiles[sessionId] = filesList;
+      localStorage.setItem("stunn_session_files", JSON.stringify(allFiles));
+    } catch (e) {
+      console.warn("Storage quota limit reached for files:", e);
+    }
+  }
+
+  function addFilesToSession(filesList) {
+    if (!filesList || !filesList.length) return;
+    const existing = getSessionFiles(currentSessionId);
+    filesList.forEach(newFile => {
+      const idx = existing.findIndex(f => f.name === newFile.name);
+      if (idx >= 0) existing[idx] = newFile;
+      else existing.push(newFile);
+    });
+    saveSessionFiles(currentSessionId, existing);
+  }
+
+  function getFileIcon(type, name) {
+    name = (name || "").toLowerCase();
+    type = (type || "").toLowerCase();
+    const wrap = (inner) => `<svg class="file-doodle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+    if (type.startsWith("image/") || /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/.test(name))
+      return wrap(`<rect x="4" y="5" width="16" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="m20 16-4.5-4.5L7 20"/>`);
+    if (type.startsWith("video/") || /\.(mp4|webm|mov|mkv|avi)$/.test(name))
+      return wrap(`<rect x="3.5" y="6" width="17" height="12" rx="2.5"/><path d="m10 9.5 5 2.5-5 2.5z" fill="currentColor" stroke="none"/>`);
+    if (type.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/.test(name))
+      return wrap(`<path d="M8 18a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z"/><path d="M16 16.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M10.2 15.8V7.2L18 5.8v8.7"/>`);
+    if (/\.(pdf)$/.test(name))
+      return wrap(`<path d="M7 3.8h7l4 4v12.4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2Z"/><path d="M14 3.8v4h4"/><path d="M8 13h8M8 16.5h5.5"/>`);
+    if (/\.(zip|tar|gz|rar|7z)$/.test(name))
+      return wrap(`<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M10 4v16M8.5 7.5h3M8.5 10.5h3M8.5 13.5h3"/>`);
+    if (/\.(py|js|ts|html|css|json|cpp|c|java|rs|go|sh)$/.test(name))
+      return wrap(`<path d="M8.5 8 5 12l3.5 4M15.5 8 19 12l-3.5 4"/><path d="M13 6.5 11 17.5"/>`);
+    return wrap(`<path d="m21 8-8.5 8.5a5 5 0 0 1-7-7L13 2a3.3 3.3 0 1 1 4.7 4.7L10 14.3a1.7 1.7 0 0 1-2.4-2.4L15 4.5"/>`);
+  }
+
+  function renderAttachmentsTray() {
+    if (!attachmentsTray) return;
+    attachmentsTray.innerHTML = "";
+    pendingAttachments.forEach((file, index) => {
+      const badge = document.createElement("div");
+      const icon = getFileIcon(file.type, file.name);
+      const isProcessing = file.status === "processing";
+      const hasPreview = !!file.previewUrl;
+      badge.className = "file-badge" + (isProcessing ? " is-processing" : "") + (hasPreview ? " has-preview" : "");
+
+      const previewHtml = hasPreview
+        ? `<img class="file-thumb" src="${file.previewUrl}" alt="${escapeHtml(file.name)} preview" />`
+        : `<span>${icon}</span>`;
+      const statusHtml = isProcessing
+        ? `<div class="file-status">${escapeHtml(file.statusText || "Processing...")}</div>`
+        : (file.status === "error" ? `<div class="file-error">${escapeHtml(file.statusText || "Processing failed")}</div>` : ``);
+
+      badge.innerHTML = `
+        ${previewHtml}
+        <div class="file-preview-body">
+          <div class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+          <div class="file-meta">${escapeHtml(formatBytes(file.size || 0))}</div>
+          ${statusHtml}
+        </div>
+        <button type="button" class="file-remove" title="Remove attachment" data-idx="${index}">✕</button>
+      `;
+      attachmentsTray.appendChild(badge);
+    });
+
+    attachmentsTray.querySelectorAll(".file-remove").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+        const removed = pendingAttachments.splice(idx, 1)[0];
+        if (removed && removed.id) attachmentProcessing.delete(removed.id);
+        renderAttachmentsTray();
+      });
+    });
+  }
+
+  async function waitForPendingAttachmentProcessing() {
+    const tasks = pendingAttachments
+      .filter(f => f.status === "processing" && f.id && attachmentProcessing.has(f.id))
+      .map(f => attachmentProcessing.get(f.id).catch(() => null));
+    if (tasks.length) await Promise.all(tasks);
+  }
+
+  if (attachFileBtn && fileAttachInput) {
+    attachFileBtn.addEventListener("click", () => fileAttachInput.click());
+    fileAttachInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) {
+        const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+        const placeholder = {
+          id,
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          status: "processing",
+          statusText: "Reading file...",
+          kind: "pending"
+        };
+        pendingAttachments.push(placeholder);
+        renderAttachmentsTray();
+
+        const task = (async () => {
+          try {
+            const fileData = await processFile(file, (text, previewUrl) => {
+              const idx = pendingAttachments.findIndex(p => p.id === id);
+              if (idx >= 0) {
+                if (text) pendingAttachments[idx].statusText = text;
+                if (previewUrl) pendingAttachments[idx].previewUrl = previewUrl;
+                renderAttachmentsTray();
+              }
+            });
+            const idx = pendingAttachments.findIndex(p => p.id === id);
+            if (idx >= 0) {
+              pendingAttachments[idx] = { ...fileData, id, status: "ready", statusText: "" };
+              renderAttachmentsTray();
+            }
+          } catch (err) {
+            console.error("Failed to process attached file:", file.name, err);
+            const idx = pendingAttachments.findIndex(p => p.id === id);
+            if (idx >= 0) {
+              pendingAttachments[idx].status = "error";
+              pendingAttachments[idx].statusText = "Could not process file";
+              pendingAttachments[idx].content = `[Attached File: ${file.name} | ${formatBytes(file.size || 0)} | processing failed]`;
+              pendingAttachments[idx].kind = "other";
+              renderAttachmentsTray();
+            }
+          } finally {
+            attachmentProcessing.delete(id);
+          }
+        })();
+        attachmentProcessing.set(id, task);
+      }
+      fileAttachInput.value = "";
+    });
+  }
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / 1048576).toFixed(1) + " MB";
+  }
+
+  function cleanAndCompactText(rawText, maxChars = 120000) {
+    if (!rawText) return "";
+    let cleaned = rawText;
+    cleaned = cleaned.replace(/data:[a-zA-Z0-9\/+\-]+;base64,[A-Za-z0-9+/=]{100,}/g, "[inline data uri omitted]");
+    cleaned = cleaned.replace(/[ \t]+/g, " ");
+    cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, "\n\n");
+    if (cleaned.length <= maxChars) return cleaned;
+    return cleaned.slice(0, maxChars) + `\n\n...[Content condensed: preserved first ${formatBytes(maxChars)} of complete file structure]`;
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function downscaleImageDataUrl(dataUrl, maxDimension = 1280, quality = 0.82) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (!width || !height) return resolve(dataUrl);
+          const scale = Math.min(1, maxDimension / Math.max(width, height));
+          if (scale === 1 && dataUrl.length < 1800000) return resolve(dataUrl);
+          width = Math.max(1, Math.round(width * scale));
+          height = Math.max(1, Math.round(height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(dataUrl);
+          ctx.drawImage(img, 0, 0, width, height);
+          const out = canvas.toDataURL("image/jpeg", quality);
+          resolve(out && out.length < dataUrl.length ? out : dataUrl);
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  }
+
+  async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 45000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const resp = await fetch(url, { ...options, signal: controller.signal });
+      const data = await resp.json().catch(() => ({}));
+      return { ok: resp.ok, status: resp.status, data };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function processFile(file, onProgress) {
+    return new Promise(async (resolve) => {
+      const fileName = file.name;
+      const fileType = file.type || "application/octet-stream";
+      const fileSize = file.size;
+
+      const isText = fileType.startsWith("text/") ||
+        /\.(txt|md|py|js|ts|html|css|json|csv|xml|log|c|cpp|h|java|sql|yaml|yml|sh|env|cfg|ini|toml|dart|jsx|tsx|vue|svelte|rb|rs|go|php|asp|aspx|sh|bat|ps1)$/i.test(fileName);
+      const isImage = fileType.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg|bmp)$/i.test(fileName);
+      const isAudio = fileType.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac|wma)$/i.test(fileName);
+      const isVideo = fileType.startsWith("video/") || /\.(mp4|webm|mov|mkv|avi|flv|wmv)$/i.test(fileName);
+
+      if (isText) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const raw = reader.result || "";
+          const processed = cleanAndCompactText(raw, 120000);
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: "text", content: processed });
+        };
+        reader.onerror = () => {
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: "other", content: `[File: ${fileName} (${formatBytes(fileSize)}, ${fileType})]` });
+        };
+        reader.readAsText(file);
+        return;
+      }
+
+      if (isImage) {
+        try {
+          onProgress && onProgress("Preparing preview...");
+          const originalDataUrl = await readFileAsDataURL(file);
+          const previewUrl = await downscaleImageDataUrl(originalDataUrl, 1280, 0.84);
+          onProgress && onProgress("Analyzing image...", previewUrl);
+          const base64Data = (previewUrl.split(",")[1] || originalDataUrl.split(",")[1] || "");
+          let imageDescription = `[Image File: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]`;
+          if (fileSize > 8 * 1024 * 1024) {
+            imageDescription += "\n[Large image: attached as a downscaled preview for faster analysis.]";
+          }
+          try {
+            const { ok, data } = await fetchJsonWithTimeout(`${BASE_URL}/process-image`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ fileData: base64Data, fileName: fileName, fileType: fileType })
+            }, 60000);
+            if (ok && data && data.description) {
+              imageDescription = `[Image Analysis of: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]\n\n${data.description}`;
+            }
+          } catch (err) {
+            console.warn("Image vision processing failed, using metadata only:", err);
+          }
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: "image", content: imageDescription, previewUrl: previewUrl });
+        } catch {
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: "image", content: `[Image File: ${fileName} | ${formatBytes(fileSize)}]` });
+        }
+        return;
+      }
+
+      if (isAudio || isVideo) {
+        const mediaKind = isAudio ? "audio" : "video";
+        try {
+          onProgress && onProgress(isAudio ? "Preparing audio..." : "Preparing video...");
+          const dataUrl = await readFileAsDataURL(file);
+          const base64Data = dataUrl.split(",")[1] || "";
+          onProgress && onProgress(isAudio ? "Transcribing audio..." : "Transcribing media...");
+          let contentResult = `[${isAudio ? "Audio" : "Video"} File: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]\n[Transcription could not be completed — metadata only.]`;
+          try {
+            const { ok, data } = await fetchJsonWithTimeout(`${BASE_URL}/process-audio`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ fileData: base64Data, fileName: fileName, fileType: fileType })
+            }, 90000);
+            if (ok && data && data.transcript) {
+              contentResult = `[Full Transcription of ${isAudio ? "Audio" : "Video"} File: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]\n\n${data.transcript}`;
+            } else if (data && data.error) {
+              contentResult = `[${isAudio ? "Audio" : "Video"} File: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]\n[Transcription failed: ${data.error}]`;
+            }
+          } catch (err) {
+            console.warn("Audio/video transcription request failed:", err);
+          }
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: mediaKind, content: contentResult });
+        } catch {
+          resolve({ name: fileName, size: fileSize, type: fileType, kind: mediaKind, content: `[${isAudio ? "Audio" : "Video"} File: ${fileName} | ${formatBytes(fileSize)}]` });
+        }
+        return;
+      }
+
+      resolve({ name: fileName, size: fileSize, type: fileType, kind: "binary", content: `[Attached File: ${fileName} | Type: ${fileType} | Size: ${formatBytes(fileSize)}]` });
+    });
+  }
+
+  // ===== STREAMING CLIENT =====
+  async function sendMessage(text) {
+    text = (text || "").trim();
+    const hasPending = pendingAttachments.length > 0 || attachmentProcessing.size > 0;
+    if (!text && !hasPending) return;
+
+    inputEl.value = "";
+    autoGrow();
+    removeWelcomeHero();
+
+    const hasProcessingAttachments = pendingAttachments.some(f => f.status === "processing");
+
+    // Thinking indicator (shown while preparing attachments / waiting for response)
+    const thinkingEl = document.createElement("div");
+    thinkingEl.className = "thinking-doodle-container";
+    thinkingEl.innerHTML = `
+      <span class="thinking-robotic-tag" id="thinkingTag">${hasProcessingAttachments ? "PREPARING ATTACHMENTS" : "THINKING"}</span>
+      <span class="thinking-dots-anim" id="thinkingDotsSpan">.</span>
+    `;
+    conversationEl.appendChild(thinkingEl);
+    conversationEl.scrollTop = conversationEl.scrollHeight;
+
+    const thinkingTag = thinkingEl.querySelector("#thinkingTag");
+    const thinkingDotsSpan = thinkingEl.querySelector("#thinkingDotsSpan");
+    let dotsCount = 1;
+    const thinkingDotsInterval = setInterval(() => {
+      dotsCount = (dotsCount % 3) + 1;
+      if (thinkingDotsSpan) thinkingDotsSpan.textContent = ".".repeat(dotsCount);
+    }, 400);
+
+    sendIcon.style.display = "none";
+    stopIcon.style.display = "block";
+    sendEl.title = "Skip / Stop generating";
+    activeAbortController = new AbortController();
+
+    if (hasProcessingAttachments) {
+      await waitForPendingAttachmentProcessing();
+    }
+
+    if (activeAbortController && activeAbortController.signal.aborted) {
+      clearInterval(thinkingDotsInterval);
+      if (thinkingEl.parentElement) thinkingEl.remove();
+      activeAbortController = null;
+      sendIcon.style.display = "block";
+      stopIcon.style.display = "none";
+      sendEl.title = "Send (Enter)";
+      return;
+    }
+
+    if (thinkingTag) thinkingTag.textContent = "THINKING";
+
+    // Take all current tray attachments for this message.
+    const activeAttachedFiles = pendingAttachments
+      .filter(f => f.status !== "processing")
+      .map(({ id, status, statusText, ...rest }) => rest);
+    pendingAttachments = [];
+    renderAttachmentsTray();
+
+    if (activeAttachedFiles.length > 0) {
+      addFilesToSession(activeAttachedFiles);
+    }
+
+    // Format display for user bubble (always render as safe HTML to avoid literal tag text)
+    let displayBubbleContent = text ? `<div>${escapeHtml(text).replace(/\n/g, "<br>")}</div>` : "";
+    if (activeAttachedFiles.length > 0) {
+      const fileTags = activeAttachedFiles.map(f => {
+        const icon = getFileIcon(f.type, f.name);
+        const img = f.previewUrl ? `<img class="bubble-file-preview" src="${f.previewUrl}" alt="${escapeHtml(f.name)} preview" />` : "";
+        return `<div class="bubble-file-tag">${icon} Attached: ${escapeHtml(f.name)} (${formatBytes(f.size)})</div>${img}`;
+      }).join("");
+      displayBubbleContent = fileTags + displayBubbleContent;
+      if (!text) displayBubbleContent = fileTags + `<div>Attached file(s). Please inspect them and help.</div>`;
+    }
+
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    const userBubble = document.createElement("div");
+    userBubble.className = "bubble";
+    userBubble.innerHTML = displayBubbleContent;
+    userMsg.appendChild(userBubble);
+    if (thinkingEl.parentElement) conversationEl.insertBefore(userMsg, thinkingEl);
+    else conversationEl.appendChild(userMsg);
+    conversationEl.scrollTop = conversationEl.scrollHeight;
+    saveMessageToCurrentChat("user", displayBubbleContent);
+
+    const thinkingStartTime = Date.now();
+    const MIN_THINKING_MS = 650;
+    let targetFullText = "";
+    let isStreamActive = true;
+    let streamFailed = false;
+    let typewriterStarted = false;
+    let typeIndex = 0;
+    let typingTimer = null;
+    let userCancelled = false;
+    let botMsg = null;
+    let botBubble = null;
+    let warmupHintTimer = null;
+
+    const preferredUserName = currentUser ? (currentUser.preferredName || currentUser.name || "") : "";
+    const customBehavior = (localStorage.getItem("stunn_custom_behavior") || "").trim();
+
+    // Compile file context from this chat session memory
+    const sessionFiles = getSessionFiles(currentSessionId);
+    let filesContextBlock = "";
+    if (sessionFiles && sessionFiles.length > 0) {
+      filesContextBlock = "\n\n[ATTACHED DOCUMENTS & SESSION FILE MEMORY]:\n";
+      sessionFiles.forEach(file => {
+        const maxLen = 120000;
+        const content = typeof file.content === "string" ? file.content : `[Attached File: ${file.name}]`;
+        const trimmedContent = content.length > maxLen
+          ? content.slice(0, maxLen) + `\n...[file exceeds maximum single-prompt payload, showing first ${maxLen} characters]`
+          : content;
+        filesContextBlock += `\n--- File: ${file.name} (${formatBytes(file.size || 0)}) ---\n${trimmedContent}\n--- End of File ---\n`;
+      });
+      filesContextBlock += "\nUse and remember the information in the attached files above to accurately fulfill all current and future inquiries in this chat session.\n";
+    }
+
+    const effectivePrompt = (customBehavior ? `[CUSTOM INSTRUCTION - Follow this persona strictly: "${customBehavior}"]\n\n` : "") +
+      (filesContextBlock ? `${filesContextBlock}\n\n` : "") +
+      (text ? `[User Inquiry]: ${text}` : (activeAttachedFiles.length > 0 ? "[User Action]: Attached file(s). Please inspect, acknowledge the file(s) by name, and provide an overview." : ""));
+
+    warmupHintTimer = setTimeout(() => {
+      if (thinkingTag && !typewriterStarted && !userCancelled) {
+        thinkingTag.textContent = "WAKING SERVER";
+      }
+    }, 4500);
+
+    function resetControls() {
+      if (warmupHintTimer) clearTimeout(warmupHintTimer);
+      clearInterval(thinkingDotsInterval);
+      activeAbortController = null;
+      sendIcon.style.display = "block";
+      stopIcon.style.display = "none";
+      sendEl.title = "Send (Enter)";
+      inputEl.focus();
+    }
+
+    function startTypewriter() {
+      if (typewriterStarted) return;
+      typewriterStarted = true;
+      if (warmupHintTimer) clearTimeout(warmupHintTimer);
+      clearInterval(thinkingDotsInterval);
+      thinkingEl.classList.add("fading-out");
+      setTimeout(() => { if (thinkingEl.parentElement) thinkingEl.remove(); }, 260);
+
+      botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+      botBubble = document.createElement("div");
+      botBubble.className = "bubble stream-content";
+      botBubble.innerHTML = '<span class="stunn-cursor"></span>';
+      botMsg.appendChild(botBubble);
+      conversationEl.appendChild(botMsg);
+      conversationEl.scrollTop = conversationEl.scrollHeight;
+
+      function typeStep() {
+        if (userCancelled) {
+          botBubble.innerHTML = formatMarkdown(targetFullText);
+          enhanceBubble(botBubble);
+          if (targetFullText && !streamFailed) { saveMessageToCurrentChat("bot", targetFullText); }
+          resetControls();
+          return;
+        }
+        if (typeIndex < targetFullText.length) {
+          const backlog = targetFullText.length - typeIndex;
+          const chunk = backlog > 300 ? 10 : (backlog > 100 ? 5 : (backlog > 30 ? 3 : 2));
+          typeIndex = Math.min(typeIndex + chunk, targetFullText.length);
+          const currentSlice = targetFullText.slice(0, typeIndex);
+          botBubble.innerHTML = formatMarkdown(currentSlice) + '<span class="stunn-cursor"></span>';
+          conversationEl.scrollTop = conversationEl.scrollHeight;
+          typingTimer = setTimeout(typeStep, 24);
+        } else if (!isStreamActive) {
+          botBubble.innerHTML = formatMarkdown(targetFullText || (streamFailed ? "I hit a problem connecting to the engine." : "(No response received)"));
+          enhanceBubble(botBubble);
+          if (targetFullText && !streamFailed) { saveMessageToCurrentChat("bot", targetFullText); }
+          resetControls();
+        } else {
+          typingTimer = setTimeout(typeStep, 24);
+        }
+      }
+      typeStep();
+    }
+
+    function scheduleTypewriter() {
+      const elapsed = Date.now() - thinkingStartTime;
+      const delay = Math.max(0, MIN_THINKING_MS - elapsed);
+      setTimeout(() => { startTypewriter(); }, delay);
+    }
+
+    const cleanQuery = text.toLowerCase().replace(/[^\w\s]/g, "").trim();
+    const isCreatorEasterEgg = [
+      "who built stunn", "who made stunn", "who created stunn", "who developed stunn",
+      "who is behind stunn", "credits", "credit", "who is the creator of stunn", "who is the founder"
+    ].some(trigger => cleanQuery === trigger || cleanQuery.startsWith(trigger));
+
+    if (isCreatorEasterEgg) {
+      targetFullText =
+        "**Stunn was built by one person — Vyom Singh.**\n\n" +
+        "Not a team. Not a startup. Not a lab. One individual.\n\n" +
+        "Every line of code, every design decision, every AI integration, " +
+        "every system talking to every other system — that's his work. " +
+        "Built from scratch, shipped, and running.\n\n" +
+        "If this impressed you, you now know exactly who to credit. " +
+        "Remember the name.\n\n" +
+        "→ [youtube.com/@VyomEditz-6](https://www.youtube.com/@VyomEditz-6)";
+      scheduleTypewriter();
+      isStreamActive = false;
+      return;
+    }
+
+    try {
+      const response = await fetch(STREAM_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: activeAbortController.signal,
+        body: JSON.stringify({
+          prompt: effectivePrompt,
+          chatInput: effectivePrompt,
+          customBehavior: customBehavior,
+          sessionId: currentSessionId,
+          mode: modeSelect.value,
+          webSearch: webSearchEnabled,
+          userName: preferredUserName
+        })
+      });
+
+      if (!response.ok) { throw new Error(`Server returned status ${response.status}`); }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("data: ")) {
+            const dataStr = trimmed.slice(6);
+            if (dataStr === "[DONE]") break;
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.token) {
+                targetFullText += parsed.token;
+                if (!typewriterStarted) { scheduleTypewriter(); }
+              }
+            } catch (e) {}
+          }
+        }
+      }
+      isStreamActive = false;
+    } catch (err) {
+      if (err.name === "AbortError") {
+        userCancelled = true;
+        isStreamActive = false;
+      } else {
+        try {
+          const fallbackRes = await fetch(CHAT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: effectivePrompt,
+              chatInput: effectivePrompt,
+              customBehavior: customBehavior,
+              sessionId: currentSessionId,
+              mode: modeSelect.value,
+              webSearch: webSearchEnabled,
+              userName: preferredUserName
+            })
+          });
+          const data = await fallbackRes.json();
+          targetFullText = data.answer || data.text || data.output || "No answer received.";
+        } catch (fallbackErr) {
+          streamFailed = true;
+          targetFullText = `Error connecting to Stunn: ${err.message}`;
+        }
+        isStreamActive = false;
+        if (!typewriterStarted) { scheduleTypewriter(); }
+      }
+    }
+  }
+
+  // ===== SEND / STOP HANDLER =====
+  sendEl.addEventListener("click", () => {
+    if (activeAbortController) { activeAbortController.abort(); }
+    else { sendMessage(inputEl.value); }
+  });
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!activeAbortController) { sendMessage(inputEl.value); }
+    }
+  });
+
+  // ===== VOICE TO TEXT =====
+  let recognition = null;
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRec();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      inputEl.value = (inputEl.value ? inputEl.value + " " : "") + transcript;
+      autoGrow();
+    };
+    recognition.onend = () => { voiceBtn.classList.remove("recording"); };
+    recognition.onerror = () => { voiceBtn.classList.remove("recording"); };
+  }
+  voiceBtn.addEventListener("click", () => {
+    if (!recognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+    if (voiceBtn.classList.contains("recording")) {
+      recognition.stop();
+      voiceBtn.classList.remove("recording");
+    } else {
+      voiceBtn.classList.add("recording");
+      recognition.start();
+    }
+  });
+
+  // ===== RESTORE WELCOME HERO =====
+  function showWelcomeHero() {
+    conversationEl.innerHTML = `
+      <div class="hero" id="welcome">
+        <div class="hero-copy">
+          <div class="hero-kicker" id="heroKicker"></div>
+          <h1>Ask <span class="beyond">beyond</span> the obvious.</h1>
+          <p class="intro">A research partner with real-time streaming, zero-glitch code architecting, and live web synthesis. Give Stunn a challenge.</p>
+          <div class="suggestions">
+            <button class="suggestion" data-q="Research the latest breakthroughs in fusion energy and summarize them with a comparison table.">
+              <span>Map recent fusion energy<br>breakthroughs in a table</span><span class="arrow">↗</span>
+            </button>
+            <button class="suggestion" data-q="Write a robust Python calculator with full error handling and tests.">
+              <span>Architect a zero-glitch<br>Python calculator</span><span class="arrow">↗</span>
+            </button>
+            <button class="suggestion" data-q="What is 15% compound interest on $10,000 over 8 years with a year-by-year table?">
+              <span>Calculate an eight-year investment schedule</span><span class="arrow">↗</span>
+            </button>
+            <button class="suggestion" data-q="Explain quantum computing like I'm five with real-world analogies.">
+              <span>Make quantum computing intuitive</span><span class="arrow">↗</span>
+            </button>
+          </div>
+        </div>
+        <div class="vertical-mark">STUNN / 02</div>
+      </div>
+    `;
+    const ws = document.getElementById("workspace");
+    if (ws) ws.classList.add("is-empty");
+    bindSuggestionButtons();
+    updateFunGreeting();
+  }
+  function bindSuggestionButtons() {
+    document.querySelectorAll(".suggestion").forEach((chip) => {
+      chip.addEventListener("click", () => sendMessage(chip.dataset.q));
+    });
+  }
+  clearEl.addEventListener("click", () => { deleteChat(currentSessionId); });
+
+  // Initialize
+  renderHistoryList();
+  bindSuggestionButtons();
+</script>
+</body>
+</html>

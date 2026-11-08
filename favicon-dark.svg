@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!-- Orange radiant glow behind the bolt -->
+    <radialGradient id="glow-dark" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ff8c00" stop-opacity="0.85"/>
+      <stop offset="40%"  stop-color="#e8590c" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#dc4e00" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Subtle inner flare on the bolt core -->
+    <radialGradient id="bolt-glow-dark" cx="50%" cy="48%" r="40%">
+      <stop offset="0%"   stop-color="#ffb347" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Orange radiant halo -->
+  <ellipse cx="50" cy="50" rx="44" ry="44" fill="url(#glow-dark)"/>
+
+  <!-- Bolt body — white for dark mode -->
+  <path d="
+    M 57,8
+    L 33,44
+    L 48,44
+    L 26,65
+    L 41,65
+    L 22,92
+    L 52,60
+    L 37,60
+    L 62,40
+    L 48,40
+    Z
+  " fill="#f4f2eb" stroke="none"/>
+
+  <!-- Subtle inner orange glow overlay on bolt -->
+  <path d="
+    M 57,8
+    L 33,44
+    L 48,44
+    L 26,65
+    L 41,65
+    L 22,92
+    L 52,60
+    L 37,60
+    L 62,40
+    L 48,40
+    Z
+  " fill="url(#bolt-glow-dark)" stroke="none"/>
+</svg>
